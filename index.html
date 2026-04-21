@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mikayla Fisher — Aerospace Engineering</title>
+<meta name="description" content="Portfolio of Mikayla Fisher — B.S. Aerospace Engineering, Worcester Polytechnic Institute (class of 2030). Projects, research, and field hockey." />
+<meta name="theme-color" content="#f4efe6" />
+<meta property="og:title" content="Mikayla Fisher — Aerospace Engineering" />
+<meta property="og:description" content="Portfolio · aerospace projects, research, and field hockey." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://mikayla.space/" />
+<link rel="canonical" href="https://mikayla.space/" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='4' fill='%23b34a2a'/%3E%3Cellipse cx='16' cy='16' rx='13' ry='5' fill='none' stroke='%2316202e' stroke-width='1.5' transform='rotate(-18 16 16)'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Caprasimo&family=DM+Serif+Display:ital@0;1&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<script>
+  // Set theme before first paint to avoid a light→dark flash.
+  (function() {
+    try {
+      var saved = localStorage.getItem('mf_theme');
+      var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'ink' : 'cream');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'cream');
+    }
+  })();
+  // Site-wide appearance. Change these to re-skin the site.
+  // system: "editorial" | "technical" | "bold" | "playful"
+  // theme:  "cream" (light) | "ink" (dark) — overridden by the user's toggle
+  window.SITE = {
+    system: "playful",
+    theme: "cream",
+    cardStyle: "card",
+    fontScale: 0.9,
+    primaryAccent: "#166534",
+    fieldHockeyAccent: "#0f4c5c"
+  };
+</script>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
