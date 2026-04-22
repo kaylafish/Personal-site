@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Nav from './components/nav.jsx';
 import Hero from './components/hero.jsx';
 import Experience from './components/experience.jsx';
@@ -26,11 +27,57 @@ const FH_SECTIONS = [
   { id: 'fh-recruiting',  label: 'Recruiting' },
 ];
 
-export default function App() {
+function ScrollToTopOnRouteChange() {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [pathname]);
+  return null;
+}
+
+function HomePage({ cardStyle }) {
+  const navigate = useNavigate();
+  return (
+    <>
+      <div className="page">
+        <Hero />
+        <Experience />
+        <Projects cardStyle={cardStyle} onViewAll={() => navigate('/projects')} />
+        <Education />
+        <Skills />
+        <Contact />
+      </div>
+      <Scrollspy sections={HOME_SECTIONS} />
+    </>
+  );
+}
+
+function ProjectsPage() {
+  const navigate = useNavigate();
+  return <AllProjects onBack={() => navigate('/')} />;
+}
+
+function FieldHockeyPage() {
+  const navigate = useNavigate();
+  return (
+    <>
+      <FieldHockey onViewAll={() => navigate('/highlights')} />
+      <footer style={{ maxWidth: 1280, margin: '0 auto' }}>
+        <span>© 2026 Mikayla Fisher</span>
+        <span>Field hockey · v1.0</span>
+      </footer>
+      <Scrollspy sections={FH_SECTIONS} />
+    </>
+  );
+}
+
+function HighlightsPage() {
+  const navigate = useNavigate();
+  return <AllHighlights onBack={() => navigate('/fieldhockey')} />;
+}
+
+function Shell() {
   const site = window.SITE || {};
-  const [page, setPage] = React.useState(() => {
-    try { return localStorage.getItem('mf_page') || 'home'; } catch (e) { return 'home'; }
-  });
   const [theme, setTheme] = React.useState(() => {
     try {
       const saved = localStorage.getItem('mf_theme');
@@ -59,51 +106,25 @@ export default function App() {
     try { localStorage.setItem('mf_theme', theme); } catch (e) {}
   }, [theme]);
 
-  React.useEffect(() => {
-    try { localStorage.setItem('mf_page', page); } catch (e) {}
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, [page]);
-
-  React.useEffect(() => {
-    window.__navTo = (p) => setPage(p);
-  }, []);
-
   return (
     <>
-      <Nav page={page} onNav={setPage} theme={theme} setTheme={setTheme} />
-
-      {page === 'home' && (
-        <React.Fragment key="home">
-          <div className="page">
-            <Hero />
-            <Experience />
-            <Projects cardStyle={site.cardStyle} onViewAll={() => setPage('projects')} />
-            <Education />
-            <Skills />
-            <Contact />
-          </div>
-          <Scrollspy sections={HOME_SECTIONS} />
-        </React.Fragment>
-      )}
-
-      {page === 'projects' && (
-        <AllProjects key="projects" onBack={() => setPage('home')} />
-      )}
-
-      {page === 'fh' && (
-        <React.Fragment key="fh">
-          <FieldHockey onViewAll={() => setPage('highlights')} />
-          <footer style={{ maxWidth: 1280, margin: '0 auto' }}>
-            <span>© 2026 Mikayla Fisher</span>
-            <span>Field hockey · v1.0</span>
-          </footer>
-          <Scrollspy sections={FH_SECTIONS} />
-        </React.Fragment>
-      )}
-
-      {page === 'highlights' && (
-        <AllHighlights key="highlights" onBack={() => setPage('fh')} />
-      )}
+      <ScrollToTopOnRouteChange />
+      <Nav theme={theme} setTheme={setTheme} />
+      <Routes>
+        <Route path="/" element={<HomePage cardStyle={site.cardStyle} />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/fieldhockey" element={<FieldHockeyPage />} />
+        <Route path="/highlights" element={<HighlightsPage />} />
+        <Route path="*" element={<HomePage cardStyle={site.cardStyle} />} />
+      </Routes>
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Shell />
+    </BrowserRouter>
   );
 }

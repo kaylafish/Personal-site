@@ -8,7 +8,7 @@ const PROJECTS = [
     title: <>FRC 2026 <em>REBUILT</em> Robot</>,
     summary: 'I was responsible for the design, modeling, and manufacturing of this robot. It features a rack and pinion intake, dye-rotor for game piece serialization, and a variable-hood shooter on a turret.',
     tech: ['CAD/CAM', 'Machining', 'FEA', 'Simulation'],
-    image: 'assets/rebuilt.png',
+    image: '/assets/rebuilt.webp',
     imageCaption: 'Robot undergoing testing'
   },
   {
@@ -16,7 +16,7 @@ const PROJECTS = [
     title: <>Model Rocket - <em>R01</em></>,
     summary: 'My first model rocket design, using a G80 motor. It reached an apogee of 3000 feet. ',
     tech: ['C++', 'Rocket Design'],
-    image: '/assets/project.jpg',
+    image: '/assets/project.webp',
     imageCaption: 'Rocketry Club fair',
   },
   {
@@ -24,7 +24,7 @@ const PROJECTS = [
     title: <>FRC 2023 <em>Charged Up!</em></>,
     summary: 'My first introduction to engineering. As a High School Freshman, I took up the responsibility of programming the entire robot. Through this, I got my foundation in controls, implementing a Finite State Machine, 2-DOF arm feedforward, and PID Control. ',
     tech: ['Python', 'OpenCV', 'YOLO', 'ffmpeg'],
-    image: '/assets/Quetzy.JPG',
+    image: '/assets/quetzy.webp',
     imageCaption: 'MHS Open House',
 
   },

@@ -21,7 +21,7 @@ function Education() {
 
       <Reveal delay={100}>
         <div className="edu-banner">
-          <img src="/assets/campus.jpg" alt="WPI campus aerial" loading="lazy" />
+          <img src="/assets/campus.webp" alt="WPI campus aerial" loading="lazy" />
           <div className="caption">Worcester Polytechnic Institute · Campus</div>
           <div className="sprite-float"><Sprite kind="ring" /></div>
         </div>

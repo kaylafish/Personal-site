@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Reveal, RevealWords } from './reveal.jsx';
 import Sprite from './sprites.jsx';
 
 function Hero() {
+  const navigate = useNavigate();
   const [time, setTime] = React.useState('');
   React.useEffect(() => {
     const tick = () => {
@@ -51,7 +53,7 @@ function Hero() {
       <div className="hero-portrait">
         <Reveal delay={200}>
           <figure>
-            <img src="/assets/portrait.jpg" alt="Mikayla Fisher" />
+            <img src="/assets/portrait.webp" alt="Mikayla Fisher" />
             <figcaption className="mono">
               <span>◉ M.F.</span>
               <span>PACIFIC COAST · SUMMER ’25</span>
@@ -76,7 +78,7 @@ function Hero() {
         <div className="hero-meta">
           <div className="label">Field Hockey</div>
           <div className="val">Forward ·{' '}
-            <a href="#fh" onClick={(e) => { e.preventDefault(); window.__navTo && window.__navTo('fh'); }}
+            <a href="/fieldhockey" onClick={(e) => { e.preventDefault(); navigate('/fieldhockey'); }}
                style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>
               see highlights →
             </a>

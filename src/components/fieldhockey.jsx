@@ -11,7 +11,7 @@ import VideoEmbed from './videoembed.jsx';
 // Leave videoId blank ('') to render a placeholder card.
 // ============================================================================
 const VIDEOS = [
-  { videoId: '', title: 'Season Highlights',   meta: '2025 · 3:42', featured: true, note: 'FULL REEL' },
+  { videoId: '23f95b0a4142c7f3714ff119cbe69308', title: 'Season Highlights',   meta: '2025 · 3:42', featured: true, note: 'FULL REEL' },
   { videoId: '', title: 'Regionals · SF',      meta: '11·08 · 0:54',                note: 'CLIP' },
   { videoId: '', title: 'Defensive Cuts',      meta: '10·22 · 1:18',                note: 'CLIP' },
   { videoId: '', title: 'Corner Plays',        meta: '10·04 · 0:48',                note: 'CLIP' },
@@ -40,7 +40,7 @@ function FieldHockey({ onViewAll }) {
           </div>
         </div>
         <div className="action-shot">
-          <img src="/assets/action.jpg" alt="Mikayla Fisher on the field" loading="lazy" />
+          <img src="/assets/action.webp" alt="Mikayla Fisher on the field" loading="lazy" />
         </div>
       </section>
 
@@ -95,9 +95,9 @@ function FieldHockey({ onViewAll }) {
         <div className="fh-about">
           <Reveal delay={100}>
             <div className="portrait has-img">
-              <img src="/assets/fh.jpg" alt="Action shot" loading="lazy" />
+              <img src="/assets/fh.webp" alt="Action shot" loading="lazy" />
               <div className="second">
-                <img src="/assets/aerial.jpg" alt="aerial" loading="lazy" />
+                <img src="/assets/aerial.webp" alt="aerial" loading="lazy" />
               </div>
             </div>
           </Reveal>
