@@ -2001,22 +2001,24 @@ html[data-system="playful"] .scrollspy a {
   min-width: 0;
 }
 
-/* Big display words — give them permission to wrap on narrow screens */
-.contact-big,
-.contact-big a,
-.fh-stats .stat .val,
-.fh-hero .jersey,
-.section-head h2,
-.fh-section h2,
-.archive-head h1,
-.hero-title,
-.edu-card .school {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
+/* Big display words — only allow breaking on mobile where space is tight */
 
 /* Mobile: reduce sizes for the things that actually overflowed in screenshots */
 @media (max-width: 600px) {
+  /* Allow breaking on narrow screens only */
+  .contact-big,
+  .contact-big a,
+  .fh-stats .stat .val,
+  .fh-hero .jersey,
+  .section-head h2,
+  .fh-section h2,
+  .archive-head h1,
+  .hero-title,
+  .edu-card .school {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   /* Section padding — restore consistent 22px gutter (was 18px and felt cramped) */
   .section, .hero, .contact, .fh-hero, .fh-section, .fh-stats,
   .archive-head, .archive-body, .archive-filter {
@@ -2093,16 +2095,15 @@ html[data-system="playful"] .scrollspy a {
    ============================================================================ */
 
 html[data-system="playful"][data-theme="ink"] {
-  --ink: #f7eaf2;
-  --ink-soft: #d4c2cf;
-  --ink-mute: #998693;
-  --paper: #1f1622;
-  --paper-2: #2c1f30;
-  --paper-3: #3a2940;
-  --line: #4a3850;
+  --ink: #f5eef4;
+  --ink-soft: #ccbec9;
+  --ink-mute: #907e8d;
+  --paper: #100e14;
+  --paper-2: #1a1720;
+  --paper-3: #262230;
+  --line: #352f40;
   --accent: #ff8cb5;
-  --accent-soft: color-mix(in oklab, #ff8cb5 22%, #1f1622);
-  /* Brighter teal for field-hockey accent so it's actually readable on dark */
+  --accent-soft: color-mix(in oklab, #ff8cb5 20%, #100e14);
   --fh-accent: #5fc8d6;
 }
 

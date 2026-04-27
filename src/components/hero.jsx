@@ -45,7 +45,7 @@ function Hero() {
 
       <h1 className="hero-title">
         <Reveal><span className="line">Mikayla</span></Reveal>
-        <Reveal delay={150}><span className="line">Fisher<span className="flourish">,</span></span></Reveal>
+        <Reveal delay={150}><span className="line">Fisher,</span></Reveal>
         <Reveal delay={300}><span className="line flourish">aerospace</span></Reveal>
         <Reveal delay={450}><span className="line">engineer.</span></Reveal>
       </h1>
@@ -54,10 +54,6 @@ function Hero() {
         <Reveal delay={200}>
           <figure>
             <img src="/assets/portrait.webp" alt="Mikayla Fisher" />
-            <figcaption className="mono">
-              <span>◉ M.F.</span>
-              <span>PACIFIC COAST · SUMMER ’25</span>
-            </figcaption>
           </figure>
         </Reveal>
       </div>
