@@ -1969,3 +1969,215 @@ html[data-system="playful"] .scrollspy a {
 @media (max-width: 900px) {
   .scrollspy { display: none; }
 }
+
+/* ============================================================================
+   MOBILE OVERFLOW + LAYOUT FIXES
+   Long display-text (email, "Forward/Midfield", section headings) was
+   spilling off the right edge on narrow viewports because grid children
+   default to min-width:auto and large clamp() font sizes don't shrink fast
+   enough. These rules cap minimum widths to 0 and let big text wrap.
+   ============================================================================ */
+
+/* Let grid/flex children actually shrink to fit narrow columns */
+.section,
+.hero,
+.contact,
+.fh-hero,
+.fh-section,
+.fh-stats,
+.fh-stats .stat,
+.archive-head,
+.archive-body,
+.archive-filter,
+.fh-recruiting,
+.fh-recruiting .block,
+.fh-recruiting .row,
+.edu-card,
+.fh-about,
+.fh-about .text,
+.contact-grid,
+.contact-grid .item,
+.skill-col {
+  min-width: 0;
+}
+
+/* Big display words — give them permission to wrap on narrow screens */
+.contact-big,
+.contact-big a,
+.fh-stats .stat .val,
+.fh-hero .jersey,
+.section-head h2,
+.fh-section h2,
+.archive-head h1,
+.hero-title,
+.edu-card .school {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Mobile: reduce sizes for the things that actually overflowed in screenshots */
+@media (max-width: 600px) {
+  /* Section padding — restore consistent 22px gutter (was 18px and felt cramped) */
+  .section, .hero, .contact, .fh-hero, .fh-section, .fh-stats,
+  .archive-head, .archive-body, .archive-filter {
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+  }
+
+  /* Contact: the email "mikayla@mikayla.space" was running off the right edge.
+     Drop the floor of the clamp + allow wrapping inside the link. */
+  .contact-big {
+    font-size: clamp(34px, 9.5vw, 64px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.02em !important;
+    margin-bottom: 40px !important;
+  }
+  .contact-big a { display: inline; }
+
+  /* fh-stats: "Forward/Midfield" at 42px on a half-width column overflows.
+     Use a compact size on phones. */
+  .fh-stats .stat .val {
+    font-size: clamp(20px, 6vw, 28px) !important;
+    line-height: 1.1 !important;
+    margin-top: 6px !important;
+  }
+
+  /* Hero ticker — stop the awkward "TRACKING · AZ 127.4° ·" mid-line wrap.
+     Stack the three pieces of info vertically on phones. */
+  .hero-ticker {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .hero-ticker > span { display: block; width: 100%; }
+
+  /* Section heads & big titles — cap so they never spill */
+  .section-head h2,
+  .fh-section h2 {
+    font-size: clamp(30px, 8.5vw, 44px) !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Hero title — slightly tighter ceiling so it never clips */
+  .hero-title {
+    font-size: clamp(40px, 12vw, 64px) !important;
+  }
+
+  /* fh-hero "Field / Hockey" jersey treatment */
+  .fh-hero .jersey {
+    font-size: clamp(48px, 13vw, 72px) !important;
+  }
+
+  /* Contact grid items — single column at very narrow widths is already set;
+     just make sure long values (email) wrap inside their cell */
+  .contact-grid .item .val {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Recruiting dl rows — prevent values overflowing */
+  .fh-recruiting dd {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+/* ============================================================================
+   DARK MODE — PLAYFUL POLISH
+   The previous dark theme used flat, slightly muddy purples and an fh-accent
+   (#0f4c5c) that was too dark on a dark background. This block:
+   - Lifts paper-2 / paper-3 to give cards real depth from the page
+   - Brightens the accent + introduces a real fh-accent for dark mode
+   - Adds soft glow to portrait/cards for warmth
+   - Strengthens borders so they read as boundaries, not noise
+   ============================================================================ */
+
+html[data-system="playful"][data-theme="ink"] {
+  --ink: #f7eaf2;
+  --ink-soft: #d4c2cf;
+  --ink-mute: #998693;
+  --paper: #1f1622;
+  --paper-2: #2c1f30;
+  --paper-3: #3a2940;
+  --line: #4a3850;
+  --accent: #ff8cb5;
+  --accent-soft: color-mix(in oklab, #ff8cb5 22%, #1f1622);
+  /* Brighter teal for field-hockey accent so it's actually readable on dark */
+  --fh-accent: #5fc8d6;
+}
+
+/* Make the field-hockey accent override (set inline by App.jsx) get
+   superseded in dark mode. App.jsx sets --fh-accent on :root from
+   window.SITE.fieldHockeyAccent (= #0f4c5c), which is too dark. We
+   override here scoped to the dark-mode html element. */
+html[data-theme="ink"] {
+  --fh-accent: #5fc8d6;
+}
+
+/* Slightly stronger card surfaces in dark mode — the previous flat
+   paper-2 made cards blend into the background. */
+html[data-theme="ink"] .xp-row,
+html[data-theme="ink"] .edu-card,
+html[data-theme="ink"] .fh-recruiting,
+html[data-theme="ink"] .stat,
+html[data-theme="ink"] .project {
+  background: color-mix(in oklab, var(--paper-2) 90%, var(--accent) 4%);
+}
+
+/* Subtle inner glow on the portrait so it pops against the dark page */
+html[data-theme="ink"] .hero-portrait img {
+  box-shadow:
+    0 0 0 10px color-mix(in oklab, var(--accent) 18%, transparent),
+    0 24px 48px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Nav backdrop deeper + a tiny border so it lifts off the page */
+html[data-theme="ink"] .nav {
+  background: color-mix(in oklab, var(--paper) 88%, transparent);
+}
+html[data-theme="ink"] .nav.scrolled {
+  border-bottom-color: color-mix(in oklab, var(--line) 70%, transparent);
+}
+
+/* Buttons / chips: dark paper-2 was barely visible against paper. Lighten. */
+html[data-theme="ink"] .chip,
+html[data-theme="ink"] button.view-all {
+  background: var(--paper-3);
+  border-color: var(--line);
+}
+
+/* Scrollspy panel — give it real glass instead of flat slab */
+html[data-theme="ink"] .scrollspy ul {
+  background: color-mix(in oklab, var(--paper-2) 75%, transparent);
+  border-color: color-mix(in oklab, var(--line) 80%, transparent);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* Section dividers in dark mode — softer */
+html[data-theme="ink"] .xp-list,
+html[data-theme="ink"] .skills,
+html[data-theme="ink"] .contact-grid,
+html[data-theme="ink"] .fh-stats {
+  border-color: color-mix(in oklab, var(--line) 65%, transparent);
+}
+
+/* Ticker / monospace bits: dim ink-mute reads almost invisible on dark */
+html[data-theme="ink"] .hero-ticker,
+html[data-theme="ink"] .hero-kicker,
+html[data-theme="ink"] .eyebrow {
+  color: var(--ink-soft);
+}
+
+/* "Hockey" pill in dark mode — make sure background mix is visible */
+html[data-system="playful"][data-theme="ink"] .fh-hero .jersey em {
+  background: color-mix(in oklab, var(--fh-accent) 28%, var(--paper-2));
+  color: var(--fh-accent);
+}
+html[data-system="playful"][data-theme="ink"] .fh-section h2 em {
+  background: color-mix(in oklab, var(--fh-accent) 28%, var(--paper-2));
+  color: var(--fh-accent);
+}
+html[data-system="playful"][data-theme="ink"] .contact-big em {
+  background: color-mix(in oklab, var(--accent) 26%, var(--paper-2));
+  color: var(--accent);
+}

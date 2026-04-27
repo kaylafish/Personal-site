@@ -92,7 +92,6 @@ function Shell() {
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-system', site.system || 'editorial');
-    document.documentElement.style.setProperty('--fh-accent', site.fieldHockeyAccent || '#4a7c3e');
     if (site.primaryAccent) {
       document.documentElement.style.setProperty('--accent', site.primaryAccent);
       document.documentElement.style.setProperty('--accent-soft',
@@ -103,6 +102,11 @@ function Shell() {
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    // Field-hockey accent is theme-aware: configured value for light,
+    // a brighter teal for dark mode so it's actually visible.
+    const fhLight = site.fieldHockeyAccent || '#4a7c3e';
+    const fhDark = '#5fc8d6';
+    document.documentElement.style.setProperty('--fh-accent', theme === 'ink' ? fhDark : fhLight);
     try { localStorage.setItem('mf_theme', theme); } catch (e) {}
   }, [theme]);
 
