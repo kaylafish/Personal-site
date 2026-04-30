@@ -8,7 +8,10 @@ import React from 'react';
 // title    — used for the <iframe title> and aria-label
 // poster   — optional override URL for the thumbnail; otherwise Cloudflare's
 //            auto-generated thumbnail is used.
-export default function VideoEmbed({ videoId, title, poster }) {
+// onPlay — optional callback(videoId). When provided, clicking the poster
+// fires onPlay instead of playing inline (used by AllHighlights to open
+// the video in a modal and push ?v= to the URL).
+export default function VideoEmbed({ videoId, title, poster, onPlay }) {
   const [playing, setPlaying] = React.useState(false);
 
   // No video uploaded yet → render a plain placeholder so layout stays intact.
@@ -28,7 +31,7 @@ export default function VideoEmbed({ videoId, title, poster }) {
       <button
         type="button"
         className="thumb thumb-poster"
-        onClick={() => setPlaying(true)}
+        onClick={() => onPlay ? onPlay(videoId) : setPlaying(true)}
         aria-label={`Play ${title || 'video'}`}
         style={{ backgroundImage: `url(${posterUrl})` }}
       >

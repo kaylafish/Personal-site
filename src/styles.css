@@ -2182,3 +2182,113 @@ html[data-system="playful"][data-theme="ink"] .contact-big em {
   background: color-mix(in oklab, var(--accent) 26%, var(--paper-2));
   color: var(--accent);
 }
+
+/* ============================================================================
+   VIDEO MODAL LIGHTBOX
+   ============================================================================ */
+.vmodal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.vmodal-content {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  background: var(--paper-2);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+}
+
+.vmodal-embed {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.vmodal-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.vmodal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.vmodal-close:hover { background: rgba(0,0,0,0.85); transform: scale(1.05); }
+
+.vmodal-title {
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* Share / copy-link button on video cards */
+.hl-card,
+.fh-video { position: relative; }
+
+.hl-share-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.52);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, transform 0.15s;
+}
+
+.hl-card:hover .hl-share-btn,
+.fh-video:hover .hl-share-btn { opacity: 1; }
+
+.hl-share-btn:hover { background: rgba(0,0,0,0.82); transform: scale(1.08); }
+
+.hl-share-btn.copied {
+  background: var(--accent);
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .vmodal-backdrop { padding: 0; }
+  .vmodal-content { border-radius: 0; min-height: 100dvh; display: flex; flex-direction: column; }
+  .vmodal-embed { flex: 1; aspect-ratio: unset; }
+  /* Always show share button on touch devices (no hover) */
+  .hl-share-btn { opacity: 1; }
+}

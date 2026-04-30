@@ -1,7 +1,9 @@
 import React from 'react';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Reveal } from './reveal.jsx';
 import Sprite from './sprites.jsx';
 import VideoEmbed from './videoembed.jsx';
+import VideoModal from './videomodal.jsx';
 
 // ============================================================================
 // FEATURED FIELD-HOCKEY VIDEOS — EDIT THIS WHEN YOU UPLOAD NEW FILM
@@ -19,7 +21,27 @@ const VIDEOS = [
 ];
 
 function FieldHockey({ onViewAll }) {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const activeVideoId = searchParams.get('v');
+  const activeVideo = activeVideoId
+    ? VIDEOS.find(v => v.videoId === activeVideoId)
+    : null;
+
+  const openVideo = (videoId) => navigate(`${pathname}?v=${videoId}`);
+  const closeVideo = () => navigate(pathname, { replace: true });
+
   return (
+    <>
+      {activeVideo && (
+        <VideoModal
+          videoId={activeVideo.videoId}
+          title={activeVideo.title}
+          onClose={closeVideo}
+        />
+      )}
     <div className="page fh">
       <section className="fh-hero" id="fh-top">
         <div>
@@ -67,7 +89,11 @@ function FieldHockey({ onViewAll }) {
           <div className="fh-videos">
             {VIDEOS.map((v, i) => (
               <div key={i} className={`fh-video ${v.featured ? 'featured' : ''}`}>
-                <VideoEmbed videoId={v.videoId} title={v.title} />
+                <VideoEmbed
+                  videoId={v.videoId}
+                  title={v.title}
+                  onPlay={v.videoId ? openVideo : undefined}
+                />
                 <div className="meta">
                   <div>
                     <div className="title">{v.title}</div>
@@ -173,6 +199,7 @@ function FieldHockey({ onViewAll }) {
         </Reveal>
       </section>
     </div>
+    </>
   );
 }
 

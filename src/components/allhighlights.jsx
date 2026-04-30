@@ -1,6 +1,8 @@
 import React from 'react';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Reveal } from './reveal.jsx';
 import VideoEmbed from './videoembed.jsx';
+import VideoModal from './videomodal.jsx';
 
 // ============================================================================
 // HIGHLIGHTS ARCHIVE — EDIT THIS LIST WHEN YOU ADD VIDEOS
@@ -26,54 +28,118 @@ const ALL_HIGHLIGHTS = [
   { videoId: '', title: 'Summer Club Reel',     sub: '2024 · 2:48',       badge: 'CLUB',      kind: 'Reels' },
 ];
 
+// Link icon SVG
+const LinkIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </svg>
+);
+
 function AllHighlights({ onBack }) {
   const [filter, setFilter] = React.useState('All');
+  const [copiedId, setCopiedId] = React.useState(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
   const cats = ['All', 'Reels', 'Games', 'Skills', 'Training'];
   const shown = filter === 'All' ? ALL_HIGHLIGHTS : ALL_HIGHLIGHTS.filter(h => h.kind === filter);
 
+  // Active video comes from the ?v= param in the URL.
+  const activeVideoId = searchParams.get('v');
+  const activeVideo = activeVideoId
+    ? ALL_HIGHLIGHTS.find(h => h.videoId === activeVideoId)
+    : null;
+
+  const openVideo = (videoId) => navigate(`${pathname}?v=${videoId}`);
+  const closeVideo = () => navigate(pathname, { replace: true });
+
+  const copyLink = (videoId, e) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/highlights?v=${videoId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(videoId);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  };
+
   return (
-    <div className="page" data-screen-label="All Highlights">
-      <header className="archive-head">
-        <div>
-          <div className="eyebrow" style={{ marginBottom: 24 }}>Field Hockey · Film Archive</div>
-          <h1><Reveal>All</Reveal> <Reveal delay={100}><em>highlights</em>.</Reveal></h1>
-        </div>
-        <div className="meta">
-          <span className="big">{ALL_HIGHLIGHTS.length}</span>
-          clips · 2024 — 2025<br/>
-          updated weekly in-season<br/>
-          sorted ↓ by recency
-        </div>
-      </header>
+    <>
+      {activeVideo && (
+        <VideoModal
+          videoId={activeVideo.videoId}
+          title={activeVideo.title}
+          onClose={closeVideo}
+        />
+      )}
 
-      <div className="archive-filter">
-        <span className="filter-label">Filter ·</span>
-        {cats.map(c => (
-          <button key={c} className={`chip ${filter === c ? 'active' : ''}`} onClick={() => setFilter(c)}>
-            {c}
-          </button>
-        ))}
-      </div>
+      <div className="page" data-screen-label="All Highlights">
+        <header className="archive-head">
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 24 }}>Field Hockey · Film Archive</div>
+            <h1><Reveal>All</Reveal> <Reveal delay={100}><em>highlights</em>.</Reveal></h1>
+          </div>
+          <div className="meta">
+            <span className="big">{ALL_HIGHLIGHTS.length}</span>
+            clips · 2024 — 2025<br/>
+            updated weekly in-season<br/>
+            sorted ↓ by recency
+          </div>
+        </header>
 
-      <div className="archive-body">
-        <div className="highlights-grid">
-          {shown.map((h, i) => (
-            <div key={i} className={`hl-card ${h.layout || ''}`} style={{ animation: `pageIn 0.6s ${i * 40}ms both` }}>
-              <VideoEmbed videoId={h.videoId} title={h.title} />
-              <div className="badge">{h.badge}</div>
-              <div className="meta">
-                <div className="title">{h.title}</div>
-                <div className="sub">{h.sub}</div>
-              </div>
-            </div>
+        <div className="archive-filter">
+          <span className="filter-label">Filter ·</span>
+          {cats.map(c => (
+            <button key={c} className={`chip ${filter === c ? 'active' : ''}`} onClick={() => setFilter(c)}>
+              {c}
+            </button>
           ))}
         </div>
 
-        <button className="view-all" onClick={onBack}>
-          <span className="arr">←</span> Back to field hockey
-        </button>
+        <div className="archive-body">
+          <div className="highlights-grid">
+            {shown.map((h, i) => (
+              <div
+                key={i}
+                className={`hl-card ${h.layout || ''}`}
+                style={{ animation: `pageIn 0.6s ${i * 40}ms both` }}
+              >
+                <VideoEmbed
+                  videoId={h.videoId}
+                  title={h.title}
+                  onPlay={h.videoId ? openVideo : undefined}
+                />
+
+                {/* Share link button — only visible on cards with a real video */}
+                {h.videoId && (
+                  <button
+                    className={`hl-share-btn ${copiedId === h.videoId ? 'copied' : ''}`}
+                    onClick={(e) => copyLink(h.videoId, e)}
+                    aria-label="Copy link to this video"
+                    title={copiedId === h.videoId ? 'Copied!' : 'Copy link'}
+                    type="button"
+                  >
+                    {copiedId === h.videoId ? '✓' : <LinkIcon />}
+                  </button>
+                )}
+
+                <div className="badge">{h.badge}</div>
+                <div className="meta">
+                  <div className="title">{h.title}</div>
+                  <div className="sub">{h.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button className="view-all" onClick={onBack}>
+            <span className="arr">←</span> Back to field hockey
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
