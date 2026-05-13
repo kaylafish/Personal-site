@@ -18,7 +18,7 @@ import VideoModal from './videomodal.jsx';
 //   { youtubeId: 'dQw4w9WgXcQ', title: 'Goals of the Season', ... }
 // ============================================================================
 const ALL_HIGHLIGHTS = [
-  { youtubeId: 'M2QuJuKaG_o', title: 'Recruiting highlight Reel', meta: '2025 · 3:42', featured: true, note: 'FULL REEL' }
+  { youtubeId: 'M2QuJuKaG_o', title: 'Recruiting highlight Reel', meta: '2026 · 3:42', featured: true, note: 'FULL REEL' }
 ];
 
 const LinkIcon = () => (

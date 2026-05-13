@@ -46,8 +46,13 @@ export default function VideoEmbed({ videoId, youtubeId, title, poster, onPlay }
         className="thumb thumb-poster"
         onClick={handleClick}
         aria-label={`Play ${title || 'video'}`}
-        style={{ backgroundImage: `url(${posterUrl})` }}
       >
+        <img
+          src={posterUrl}
+          alt={title || 'Video thumbnail'}
+          className="thumb-poster-img"
+          loading="lazy"
+        />
         <div className="play" />
         {youtubeId && (
           <span className="yt-badge" aria-hidden="true">

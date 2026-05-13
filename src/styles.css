@@ -1558,10 +1558,7 @@ html[data-system="technical"] .fh-about .portrait.has-img .second { transform: n
 button.thumb {
   appearance: none;
   -webkit-appearance: none;
-  background-color: var(--paper-2);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: #000;
   border: none;
   padding: 0;
   margin: 0;
@@ -1570,6 +1567,15 @@ button.thumb {
   font: inherit;
   color: inherit;
   cursor: pointer;
+  display: block;
+  position: relative;
+}
+.thumb-poster-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
 button.thumb.thumb-poster::before {

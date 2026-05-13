@@ -95,8 +95,9 @@ function FieldHockey({ onViewAll }) {
               <div key={i} className={`fh-video ${v.featured ? 'featured' : ''}`}>
                 <VideoEmbed
                   videoId={v.videoId}
+                  youtubeId={v.youtubeId}
                   title={v.title}
-                  onPlay={v.videoId ? openVideo : undefined}
+                  onPlay={(v.videoId || v.youtubeId) ? openVideo : undefined}
                 />
                 <div className="meta">
                   <div>
