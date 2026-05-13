@@ -7,28 +7,20 @@ import VideoModal from './videomodal.jsx';
 // ============================================================================
 // HIGHLIGHTS ARCHIVE — EDIT THIS LIST WHEN YOU ADD VIDEOS
 // ----------------------------------------------------------------------------
-// For each entry, paste the Cloudflare Stream video UID into `videoId`.
-// Find the UID in your Cloudflare dashboard → Stream → the video's details.
-// It looks like: "31c9291ab41fac05f02f2b3136cb956a"
-// Leave videoId blank ('' or omit) for videos that haven't been uploaded yet —
-// those cards will still render as placeholders.
+// Each entry uses ONE of:
+//   videoId   — Cloudflare Stream UID  (from Cloudflare dashboard → Stream)
+//   youtubeId — YouTube video ID       (the part after ?v= in the YouTube URL)
+//
+// Leave both blank to show a placeholder card.
+//
+// Example entries:
+//   { videoId: '31c9291ab41fac05f02f2b3136cb956a', title: 'Season Highlights', ... }
+//   { youtubeId: 'dQw4w9WgXcQ', title: 'Goals of the Season', ... }
 // ============================================================================
 const ALL_HIGHLIGHTS = [
-  { videoId: '', title: 'Season Highlights',    sub: '2025 · 3:42',       badge: 'FULL REEL', kind: 'Reels',    layout: 'spotlight' },
-  { videoId: '', title: 'Goals of the Season',  sub: '2025 · 2:10',       badge: 'REEL',      kind: 'Reels' },
-  { videoId: '', title: 'Regionals · Semifinals', sub: '11·08·25 · 0:54', badge: 'CLIP',      kind: 'Games' },
-  { videoId: '', title: 'Defensive Cuts',       sub: '10·22·25 · 1:18',   badge: 'CLIP',      kind: 'Skills',   layout: 'wide' },
-  { videoId: '', title: 'Corner Plays',         sub: '10·04·25 · 0:48',   badge: 'CLIP',      kind: 'Skills' },
-  { videoId: '', title: 'Penalty Corners',      sub: '2025 · 1:02',       badge: 'DRILL',     kind: 'Skills' },
-  { videoId: '', title: 'vs. Rival High',       sub: '09·28·25 · 1:30',   badge: 'GAME',      kind: 'Games' },
-  { videoId: '', title: 'Pre-Season Camp',      sub: '08·15·25 · 2:14',   badge: 'TRAINING',  kind: 'Training' },
-  { videoId: '', title: 'Season Highlights',    sub: '2024 · 3:08',       badge: 'FULL REEL', kind: 'Reels',    layout: 'wide' },
-  { videoId: '', title: 'Midfield Transitions', sub: '2024 · 1:40',       badge: 'SKILLS',    kind: 'Skills' },
-  { videoId: '', title: 'vs. District Rivals',  sub: '10·12·24 · 1:22',   badge: 'GAME',      kind: 'Games' },
-  { videoId: '', title: 'Summer Club Reel',     sub: '2024 · 2:48',       badge: 'CLUB',      kind: 'Reels' },
+  { youtubeId: 'M2QuJuKaG_o', title: 'Recruiting highlight Reel', meta: '2025 · 3:42', featured: true, note: 'FULL REEL' }
 ];
 
-// Link icon SVG
 const LinkIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
     stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -47,20 +39,28 @@ function AllHighlights({ onBack }) {
   const cats = ['All', 'Reels', 'Games', 'Skills', 'Training'];
   const shown = filter === 'All' ? ALL_HIGHLIGHTS : ALL_HIGHLIGHTS.filter(h => h.kind === filter);
 
-  // Active video comes from the ?v= param in the URL.
-  const activeVideoId = searchParams.get('v');
+  // ?v=  → Cloudflare Stream UID
+  // ?yt= → YouTube video ID
+  const activeVideoId  = searchParams.get('v');
+  const activeYoutubeId = searchParams.get('yt');
   const activeVideo = activeVideoId
     ? ALL_HIGHLIGHTS.find(h => h.videoId === activeVideoId)
+    : activeYoutubeId
+    ? ALL_HIGHLIGHTS.find(h => h.youtubeId === activeYoutubeId)
     : null;
 
-  const openVideo = (videoId) => navigate(`${pathname}?v=${videoId}`);
+  const openVideo = ({ videoId, youtubeId }) => {
+    if (youtubeId) navigate(`${pathname}?yt=${youtubeId}`);
+    else navigate(`${pathname}?v=${videoId}`);
+  };
   const closeVideo = () => navigate(pathname, { replace: true });
 
-  const copyLink = (videoId, e) => {
+  const copyLink = ({ videoId, youtubeId }, e) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/highlights?v=${videoId}`;
+    const param = youtubeId ? `yt=${youtubeId}` : `v=${videoId}`;
+    const url = `${window.location.origin}/highlights?${param}`;
     navigator.clipboard.writeText(url).then(() => {
-      setCopiedId(videoId);
+      setCopiedId(videoId || youtubeId);
       setTimeout(() => setCopiedId(null), 2000);
     });
   };
@@ -70,6 +70,7 @@ function AllHighlights({ onBack }) {
       {activeVideo && (
         <VideoModal
           videoId={activeVideo.videoId}
+          youtubeId={activeVideo.youtubeId}
           title={activeVideo.title}
           onClose={closeVideo}
         />
@@ -100,38 +101,42 @@ function AllHighlights({ onBack }) {
 
         <div className="archive-body">
           <div className="highlights-grid">
-            {shown.map((h, i) => (
-              <div
-                key={i}
-                className={`hl-card ${h.layout || ''}`}
-                style={{ animation: `pageIn 0.6s ${i * 40}ms both` }}
-              >
-                <VideoEmbed
-                  videoId={h.videoId}
-                  title={h.title}
-                  onPlay={h.videoId ? openVideo : undefined}
-                />
+            {shown.map((h, i) => {
+              const hasVideo = h.videoId || h.youtubeId;
+              const cardId = h.videoId || h.youtubeId;
+              return (
+                <div
+                  key={i}
+                  className={`hl-card ${h.layout || ''}`}
+                  style={{ animation: `pageIn 0.6s ${i * 40}ms both` }}
+                >
+                  <VideoEmbed
+                    videoId={h.videoId}
+                    youtubeId={h.youtubeId}
+                    title={h.title}
+                    onPlay={hasVideo ? openVideo : undefined}
+                  />
 
-                {/* Share link button — only visible on cards with a real video */}
-                {h.videoId && (
-                  <button
-                    className={`hl-share-btn ${copiedId === h.videoId ? 'copied' : ''}`}
-                    onClick={(e) => copyLink(h.videoId, e)}
-                    aria-label="Copy link to this video"
-                    title={copiedId === h.videoId ? 'Copied!' : 'Copy link'}
-                    type="button"
-                  >
-                    {copiedId === h.videoId ? '✓' : <LinkIcon />}
-                  </button>
-                )}
+                  {hasVideo && (
+                    <button
+                      className={`hl-share-btn ${copiedId === cardId ? 'copied' : ''}`}
+                      onClick={(e) => copyLink({ videoId: h.videoId, youtubeId: h.youtubeId }, e)}
+                      aria-label="Copy link to this video"
+                      title={copiedId === cardId ? 'Copied!' : 'Copy link'}
+                      type="button"
+                    >
+                      {copiedId === cardId ? '✓' : <LinkIcon />}
+                    </button>
+                  )}
 
-                <div className="badge">{h.badge}</div>
-                <div className="meta">
-                  <div className="title">{h.title}</div>
-                  <div className="sub">{h.sub}</div>
+                  <div className="badge">{h.badge}</div>
+                  <div className="meta">
+                    <div className="title">{h.title}</div>
+                    <div className="sub">{h.sub}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <button className="view-all" onClick={onBack}>

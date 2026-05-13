@@ -1,9 +1,9 @@
 import React from 'react';
 
-// Full-screen lightbox for Cloudflare Stream videos.
-// Usage: <VideoModal videoId="abc123" title="Season Highlights" onClose={fn} />
+// Full-screen lightbox supporting Cloudflare Stream and YouTube.
+// Supply exactly one of videoId (Cloudflare) or youtubeId (YouTube).
 // Close on Escape key or clicking the backdrop.
-export default function VideoModal({ videoId, title, onClose }) {
+export default function VideoModal({ videoId, youtubeId, title, onClose }) {
   React.useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);
@@ -13,6 +13,14 @@ export default function VideoModal({ videoId, title, onClose }) {
       document.body.style.overflow = '';
     };
   }, [onClose]);
+
+  const iframeSrc = youtubeId
+    ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`
+    : `https://iframe.videodelivery.net/${videoId}?autoplay=true&muted=false`;
+
+  const iframeAllow = youtubeId
+    ? 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+    : 'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;';
 
   return (
     <div
@@ -37,10 +45,10 @@ export default function VideoModal({ videoId, title, onClose }) {
 
         <div className="vmodal-embed">
           <iframe
-            src={`https://iframe.videodelivery.net/${videoId}?autoplay=true&muted=false`}
-            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+            src={iframeSrc}
+            allow={iframeAllow}
             allowFullScreen
-            title={title || 'Highlight video'}
+            title={title || 'Video'}
           />
         </div>
 

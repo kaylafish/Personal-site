@@ -768,6 +768,7 @@ html[data-system="playful"] .fh-section h2 em { background: color-mix(in oklab, 
 }
 .fh-video .meta .title { font-family: var(--display); font-style: var(--em-style); font-size: 18px; color: #fff; letter-spacing: -0.01em; }
 .fh-video.featured { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
+.fh-video.featured:only-child { grid-column: 1 / -1; grid-row: auto; aspect-ratio: 16 / 9; max-width: 860px; }
 html[data-system="playful"] .fh-video { border-radius: 20px; border: 2px solid var(--line); }
 
 .fh-about { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; border-top: 1px solid var(--line); padding-top: 60px; }
@@ -2291,4 +2292,16 @@ html[data-system="playful"][data-theme="ink"] .contact-big em {
   .vmodal-embed { flex: 1; aspect-ratio: unset; }
   /* Always show share button on touch devices (no hover) */
   .hl-share-btn { opacity: 1; }
+}
+
+/* YouTube badge on video thumbnails */
+.yt-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  overflow: hidden;
+  opacity: 0.9;
 }

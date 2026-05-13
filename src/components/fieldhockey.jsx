@@ -8,16 +8,15 @@ import VideoModal from './videomodal.jsx';
 // ============================================================================
 // FEATURED FIELD-HOCKEY VIDEOS — EDIT THIS WHEN YOU UPLOAD NEW FILM
 // ----------------------------------------------------------------------------
-// Paste the Cloudflare Stream video UID into `videoId` for each entry.
+// Each entry uses ONE of:
+//   videoId   — Cloudflare Stream UID  (from Cloudflare dashboard → Stream)
+//   youtubeId — YouTube video ID       (the part after ?v= in the YouTube URL)
+//
 // The first entry with featured:true renders larger than the rest.
-// Leave videoId blank ('') to render a placeholder card.
+// Leave both blank ('') to render a placeholder card.
 // ============================================================================
 const VIDEOS = [
-  { videoId: '23f95b0a4142c7f3714ff119cbe69308', title: 'Season Highlights',   meta: '2025 · 3:42', featured: true, note: 'FULL REEL' },
-  { videoId: '', title: 'Regionals · SF',      meta: '11·08 · 0:54',                note: 'CLIP' },
-  { videoId: '', title: 'Defensive Cuts',      meta: '10·22 · 1:18',                note: 'CLIP' },
-  { videoId: '', title: 'Corner Plays',        meta: '10·04 · 0:48',                note: 'CLIP' },
-  { videoId: '', title: 'Goals of the Season', meta: '2025 · 2:10',                 note: 'REEL' },
+  { youtubeId: 'M2QuJuKaG_o', title: 'Recruiting highlight Reel', meta: '2025 · 3:42', featured: true, note: 'FULL REEL' }
 ];
 
 function FieldHockey({ onViewAll }) {
@@ -25,12 +24,19 @@ function FieldHockey({ onViewAll }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const activeVideoId = searchParams.get('v');
+  // ?v= → Cloudflare Stream UID, ?yt= → YouTube video ID
+  const activeVideoId   = searchParams.get('v');
+  const activeYoutubeId = searchParams.get('yt');
   const activeVideo = activeVideoId
     ? VIDEOS.find(v => v.videoId === activeVideoId)
+    : activeYoutubeId
+    ? VIDEOS.find(v => v.youtubeId === activeYoutubeId)
     : null;
 
-  const openVideo = (videoId) => navigate(`${pathname}?v=${videoId}`);
+  const openVideo = ({ videoId, youtubeId }) => {
+    if (youtubeId) navigate(`${pathname}?yt=${youtubeId}`);
+    else navigate(`${pathname}?v=${videoId}`);
+  };
   const closeVideo = () => navigate(pathname, { replace: true });
 
   return (
@@ -38,6 +44,7 @@ function FieldHockey({ onViewAll }) {
       {activeVideo && (
         <VideoModal
           videoId={activeVideo.videoId}
+          youtubeId={activeVideo.youtubeId}
           title={activeVideo.title}
           onClose={closeVideo}
         />
@@ -52,9 +59,6 @@ function FieldHockey({ onViewAll }) {
             <Reveal><span style={{ display: 'block' }}>Field</span></Reveal>
             <Reveal delay={150}><span style={{ display: 'block' }}><em>Hockey</em></span></Reveal>
           </h1>
-          <p className="lede" style={{ marginTop: 32 }}>
-            Playing <em>forward</em> since middle school. Two-year HS varsity player. Team captain and player.
-          </p>
           <div className="sprite-strip">
             <Sprite kind="stick" className="fhaccent" />
             <span>varsity · club</span>
@@ -62,7 +66,7 @@ function FieldHockey({ onViewAll }) {
           </div>
         </div>
         <div className="action-shot">
-          <img src="/assets/action.webp" alt="Mikayla Fisher on the field" loading="lazy" />
+          <img src="/assets/action.webp" alt="" loading="lazy" />
         </div>
       </section>
 
