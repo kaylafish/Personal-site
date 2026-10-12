@@ -14,7 +14,7 @@ import { easeInOutCubic, prefersReducedMotion } from './motion.jsx';
 //   focus     a subsystem's node name: the camera moves to it and the rest
 //             fade to 7%; '' for the whole robot
 //   spin      turntable speed, radians per second
-//   shift     moves the robot left by this share of the width
+//   shift     moves the robot right by this share of the width
 //   lift      moves the robot up by this share of the height
 // On load every subsystem and part starts exploded, holds 0.5 s, then
 // assembles over 1.8 s.

@@ -16,7 +16,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 //             the rest to ~18%; '' for the whole launcher
 //   top, bottom   wheel speeds in rad/s (the ball spins with the difference)
 //   yaw       camera angle around the launcher, radians
-//   shift     moves the launcher left by this share of the width
+//   shift     moves the launcher right by this share of the width
 //
 // Performance (keep these): each top-level part's meshes are merged per
 // material on load (4,124 → ~60 draw calls); wheels and ball stay separate
