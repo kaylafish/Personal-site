@@ -340,7 +340,8 @@ async function fly(forward, change) {
     const order = [...PROJECTS].reverse().map((p) => p.slug);
     const items = [...document.querySelectorAll(from)]
       .map((el) => ({ el, slug: el.getAttribute(forward ? 'data-pt-field' : 'data-pt-tile') }))
-      .filter((it) => getProject(it.slug))
+      // Phones hide the home field's cards, so only fly the ones on screen.
+      .filter((it) => getProject(it.slug) && it.el.getClientRects().length)
       .sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
 
     const radOf = (el) => parseFloat(getComputedStyle(el).borderTopLeftRadius) || 16;
@@ -373,7 +374,7 @@ async function fly(forward, change) {
     let last = 0;
     clones.forEach((it, i) => {
       const dest = document.querySelector(`[${to}="${CSS.escape(it.slug)}"]`);
-      if (!dest) { it.c.style.transition = `opacity ${D * 0.3}ms ease`; it.c.style.opacity = '0'; return; }
+      if (!dest || !dest.getClientRects().length) { it.c.style.transition = `opacity ${D * 0.3}ms ease`; it.c.style.opacity = '0'; return; }
       hide(dest);
       const b = boxOf(dest);
       const delay = i * STAGGER;

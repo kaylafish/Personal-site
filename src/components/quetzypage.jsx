@@ -3,8 +3,10 @@ import { RESUME_FILENAME, RESUME_URL } from '../site.js';
 import {
   AUTO_FIG, CONE, CUBE, INTAKE_FACTS, LAYERS, LIMITS, PHOTOS, PRESETS, RESULTS, STAGGER, STATES, STATS, TABLE, TOUR,
 } from '../data/quetzy.js';
+import { getProject } from '../data/projects.js';
 import { ProgressBar } from './home.jsx';
 import { Rv, clamp, prefersReducedMotion, useGlassTheme, useScrollFrame } from './motion.jsx';
+import { ModelFallback, SkipOnError } from './modelfallback.jsx';
 import { PageLink } from './pagelink.jsx';
 import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
@@ -20,14 +22,7 @@ import '../quetzy.css';
 // three.js only loads on this page.
 const QuetzyView = React.lazy(() => import('./quetzyview.jsx'));
 const MODEL = '/models/quetzy.glb';
-
-// If the viewer's code can't load (offline, a stale deploy), the page goes
-// on without the model.
-class SkipOnError extends React.Component {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? null : this.props.children; }
-}
+const COVER = getProject('frc-charged-up');
 
 const NARROW = '(max-width: 759px)';
 function useNarrow() {
@@ -166,19 +161,12 @@ function Tour({ narrow }) {
   const [ld, setLd] = React.useState(0);
   const [loaded, setLoaded] = React.useState(false);
 
-  // Arriving from the home page's story, its photo has grown to fill the
-  // top of the screen (see projects.jsx). Fade it out to reveal the robot.
-  React.useEffect(() => {
-    const overlay = document.querySelector('.g-expand');
-    if (!overlay) return;
-    overlay.style.transition = 'opacity .5s ease';
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 520);
-  }, []);
-
   // The model loads once the opening transition has landed: loading
   // three.js mid-flight would freeze the motion.
   const [settled, setSettled] = React.useState(false);
+  // No WebGL, or the model or viewer failed to load: show the cover photo.
+  const [modelFailed, setModelFailed] = React.useState(false);
+  const onModelError = React.useCallback(() => setModelFailed(true), []);
   React.useLayoutEffect(() => whenSettled(() => setSettled(true)), []);
 
   const si = Math.min(STOPS - 1, Math.floor(p * STOPS));
@@ -188,14 +176,17 @@ function Tour({ narrow }) {
   return (
     <section id="qz-robot" ref={ref} className="g-rs-pin g-qz-tour">
       <div className="g-rs-sticky g-qz-tour-sticky">
-        {settled && <SkipOnError>
+        {modelFailed ? <ModelFallback className="g-qz-model" src={COVER.cover} alt={COVER.coverAlt} />
+          : settled && <SkipOnError onError={onModelError}>
           <React.Suspense fallback={null}>
             <QuetzyView
+              onError={onModelError}
               className="g-qz-model"
               src={MODEL}
               focus={hero ? '' : TOUR[ti].focus}
               yaw={0.8 + p * 2.4}
               shift={narrow || hero ? 0 : 0.18}
+              lift={narrow && !hero ? 0.2 : 0}
               onProgress={setLd}
               onLoaded={() => setLoaded(true)}
             />
@@ -207,7 +198,7 @@ function Tour({ narrow }) {
           <h1>Quetzy, <em>robot software</em></h1>
         </div>
         <div className={`g-qz-cue ${hero ? '' : 'is-off'}`}>
-          {settled && !loaded && <span>Loading the CAD · {Math.round(ld * 100)}%</span>}
+          {settled && !loaded && !modelFailed && <span>Loading the CAD · {Math.round(ld * 100)}%</span>}
           <span>Scroll for the subsystems</span>
         </div>
 

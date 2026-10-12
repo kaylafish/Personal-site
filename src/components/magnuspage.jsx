@@ -1,8 +1,10 @@
 import React from 'react';
 import { RESUME_FILENAME, RESUME_URL } from '../site.js';
 import { BALL, CHAPTERS, CL_FIT, FACTS, RESULTS, STEPS, TOUR } from '../data/magnus.js';
+import { getProject } from '../data/projects.js';
 import { ProgressBar } from './home.jsx';
 import { clamp, useGlassTheme, useScrollFrame } from './motion.jsx';
+import { ModelFallback, SkipOnError } from './modelfallback.jsx';
 import { PageLink } from './pagelink.jsx';
 import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
@@ -17,14 +19,7 @@ import '../magnus.css';
 // three.js only loads on this page.
 const LauncherView = React.lazy(() => import('./launcherview.jsx'));
 const MODEL = '/models/launcher.glb';
-
-// If the viewer's code can't load (offline, a stale deploy), the page goes
-// on without the model.
-class SkipOnError extends React.Component {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? null : this.props.children; }
-}
+const COVER = getProject('magnus-effect');
 
 function jumpTo(id) {
   return (e) => {
@@ -170,15 +165,6 @@ function FlightModel() {
 }
 
 function Hero() {
-  // Arriving from the home page's story, its photo has grown to fill the
-  // top of the screen (see projects.jsx). Fade it out to reveal the page.
-  React.useEffect(() => {
-    const overlay = document.querySelector('.g-expand');
-    if (!overlay) return;
-    overlay.style.transition = 'opacity .5s ease';
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 520);
-  }, []);
   return (
     <section id="ch-top" className="g-mg-hero">
       <span className="g-rs-eyebrow" data-build="" style={{ '--b': 0 }}>IB Physics Extended Essay · May 2026</span>
@@ -214,14 +200,18 @@ function Launcher() {
   // The model loads once the opening transition has landed: loading
   // three.js mid-flight would freeze the motion.
   const [settled, setSettled] = React.useState(false);
+  // No WebGL, or the model or viewer failed to load: show the cover photo.
+  const [modelFailed, setModelFailed] = React.useState(false);
+  const onModelError = React.useCallback(() => setModelFailed(true), []);
   React.useLayoutEffect(() => whenSettled(() => setSettled(true)), []);
 
   return (
     <section id="ch-setup" ref={ref} className="g-rs-pin g-mg-launcher">
       <div className="g-rs-sticky">
-        {settled && <SkipOnError>
+        {modelFailed ? <ModelFallback className="g-mg-launcher-canvas" src={COVER.cover} alt={COVER.coverAlt} />
+          : settled && <SkipOnError onError={onModelError}>
           <React.Suspense fallback={null}>
-            <LauncherView className="g-mg-launcher-canvas" src={MODEL} view={view} />
+            <LauncherView onError={onModelError} className="g-mg-launcher-canvas" src={MODEL} view={view} />
           </React.Suspense>
         </SkipOnError>}
         <div className="g-mg-tour">

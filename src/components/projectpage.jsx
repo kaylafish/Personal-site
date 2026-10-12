@@ -10,6 +10,7 @@ import RebuiltPage from './rebuiltpage.jsx';
 import ResearchPage from './researchpage.jsx';
 import QuetzyPage from './quetzypage.jsx';
 import { loadModelViewer, whenSettled } from '../transitions.js';
+import { SkipOnError } from './modelfallback.jsx';
 
 // /projects/<slug>: the "datasheet" page. One template for every project,
 // driven by its entry in data/projects.js.
@@ -108,16 +109,6 @@ function Datasheet({ slug }) {
     setActive(at);
   }, [slug]);
 
-  // Arriving from the home page's story, the expanded photo is still on
-  // screen (see projects.jsx). Fade it out to reveal the real hero.
-  React.useEffect(() => {
-    const overlay = document.querySelector('.g-expand');
-    if (!overlay) return;
-    overlay.style.transition = 'opacity .5s ease';
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 520);
-  }, [slug]);
-
   // The model loads once the opening transition has landed (whenSettled).
   const [settled, setSettled] = React.useState(false);
   React.useLayoutEffect(() => {
@@ -159,9 +150,11 @@ function Datasheet({ slug }) {
               moment to load, so those pages take the card's title instead. */}
           {!model && <div className="g-pp-hero-box" data-pt-hero="" aria-hidden="true" />}
           {model ? (settled && (
-            <React.Suspense fallback={null}>
-              <ModelViewer key={project.slug} hero {...model} />
-            </React.Suspense>
+            <SkipOnError key={project.slug}>
+              <React.Suspense fallback={null}>
+                <ModelViewer hero {...model} />
+              </React.Suspense>
+            </SkipOnError>
           )) : (
             <>
               <img src={project.hero.src} alt={project.coverAlt} />

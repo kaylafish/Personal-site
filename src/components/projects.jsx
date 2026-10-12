@@ -1,6 +1,7 @@
 import React from 'react';
 import { getProject, projectModel, projectPath } from '../data/projects.js';
 import { MOBILE_QUERY, Rv, prefersReducedMotion, useScrollFrame } from './motion.jsx';
+import { SkipOnError } from './modelfallback.jsx';
 import { useOpenProject } from './projectcard.jsx';
 import { heroHeight } from './projectpage.jsx';
 
@@ -10,7 +11,8 @@ const ModelViewer = React.lazy(() => import('./modelviewer.jsx'));
 // ============================================================================
 // PROJECT CHAPTERS — EDIT THIS LIST TO CHANGE THE STORY
 // ----------------------------------------------------------------------------
-// Each chapter scrolls past the sticky photo panel on the left. `slug` ties
+// The three featured projects, strongest first. Everything else is one tap
+// away on /projects. Each chapter scrolls past the sticky photo panel on the left. `slug` ties
 // it to a project in data/projects.js, which supplies the photo, the 3D
 // model (if it has one) and the page "Read the full build" opens.
 // ============================================================================
@@ -36,36 +38,16 @@ const CHAPTERS = [
     body: 'Our San Francisco Regional winner, named for my late mentor, Robin Coyne. A swerve robot with a pivoting elevator, a coaxial differential wrist and a five-joint arm that only ever moves along safe paths.',
     tags: ['Mechanical design', 'Swerve', 'Elevator', 'Differential wrist'],
   },
-  {
-    slug: 'magnus-effect',
-    eyebrow: '2026 · IB Extended Essay',
-    title: <>The Magnus <em>effect</em></>,
-    body: 'How the lift on a smooth foam ball grows with its spin. I built a two-wheel launcher, filmed 50 shots at 240 fps, and fitted a numerical flight model to the results.',
-    tags: ['RK4', 'χ² fit', 'High-speed video', 'CAD'],
-  },
-  {
-    slug: 'hydro-generator',
-    eyebrow: '2026 · IB Physics HL',
-    title: <>Hydro <em>generator</em></>,
-    body: 'A miniature hydroelectric generator: does a CIM motor’s voltage follow V ∝ √h as the water drops further? The fit gave k = 1.31 ± 0.06, 67% of the ideal, and the write-up explains where the rest went.',
-    tags: ['CNC', '3D printing', 'Data analysis'],
-  },
-  {
-    slug: 'frc-charged-up',
-    eyebrow: '2023 · FRC Charged Up!',
-    title: <>Quetzy</>,
-    body: 'As a freshman I took on programming the entire robot. It gave me my foundation in controls: a finite state machine, 2-DOF arm feedforward, and PID.',
-    tags: ['Java', 'Swerve', 'PathPlanner'],
-  },
 ];
 
 // The pinned photo grows into the project page's hero, then the route
-// changes underneath it. projectpage.jsx fades the photo out on arrival.
-function expandInto(fromEl, src, done) {
+// changes underneath it. App.jsx fades the photo out on arrival.
+function expandInto(fromEl, src, drawing, done) {
   if (!fromEl || prefersReducedMotion()) { done(); return; }
   const r = fromEl.getBoundingClientRect();
   const el = document.createElement('div');
-  el.className = 'g-expand';
+  // A drawing stays whole instead of zooming into a crop.
+  el.className = drawing ? 'g-expand is-drawing' : 'g-expand';
   el.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;`
     + `border-radius:${getComputedStyle(fromEl).borderRadius};background-image:url("${src}")`;
   document.body.appendChild(el);
@@ -109,7 +91,7 @@ function Projects() {
       ? chapterRefs.current[i].querySelector('.g-chapter-img')
       : panelRef.current;
     setLeaving(true);
-    expandInto(from, project.cover, () => openProject(project.slug, { transition: false }));
+    expandInto(from, project.cover, project.coverFit === 'contain', () => openProject(project.slug, { transition: false }));
   };
 
   return (
@@ -127,9 +109,12 @@ function Projects() {
               className={`${i === active ? 'is-on' : ''} ${c.project.coverFit === 'contain' ? 'is-drawing' : ''}`} />
           ))}
           {show3d && (
-            <React.Suspense fallback={null}>
-              <ModelViewer key={chapters[active].slug} {...model} />
-            </React.Suspense>
+            // If the viewer's code fails to download, go back to the photo.
+            <SkipOnError key={chapters[active].slug} onError={() => setView3d(false)}>
+              <React.Suspense fallback={null}>
+                <ModelViewer {...model} />
+              </React.Suspense>
+            </SkipOnError>
           )}
           {canView3d && (
             <button type="button" className="g-3d-toggle" onClick={() => setView3d((v) => !v)}>

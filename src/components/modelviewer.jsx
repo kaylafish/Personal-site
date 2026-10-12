@@ -68,8 +68,9 @@ function disposeModel(model) {
   });
 }
 
-// `hero` is the project-page variant: no wheel zoom (the page has to scroll
-// past it) and only the explode control, since the page already names it.
+// `hero` is the project-page variant: only the explode control, since the
+// page already names it. Neither variant zooms on the wheel: the viewer sits
+// in a scrolling page, and catching the wheel would stop the page scrolling.
 function ModelViewer({ src, up, label, note, hero = false }) {
   const hostRef = React.useRef(null);
   const sliderRef = React.useRef(null);
@@ -101,7 +102,7 @@ function ModelViewer({ src, up, label, note, hero = false }) {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
-    controls.enableZoom = !hero;
+    controls.enableZoom = false;
     // OrbitControls claims every touch; in the page hero, let vertical swipes
     // scroll the page and keep sideways drags for turning the model.
     if (hero) renderer.domElement.style.touchAction = 'pan-y';
@@ -219,6 +220,7 @@ function ModelViewer({ src, up, label, note, hero = false }) {
       ground.geometry.dispose();
       ground.material.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
       renderer.domElement.remove();
     };
   }, [src, up, hero]);
@@ -247,7 +249,7 @@ function ModelViewer({ src, up, label, note, hero = false }) {
       {message && <div className="g-viewer-fail">{message}</div>}
       {status === 'ready' && (
         <>
-          <div className="g-viewer-hint">{hero ? 'Drag to orbit' : 'Drag to orbit · scroll to zoom'}</div>
+          <div className="g-viewer-hint">Drag to orbit</div>
           <div className="g-viewer-ui">
             <div className="g-viewer-tag"><b>{label}</b>{note}</div>
             {canExplode && (
