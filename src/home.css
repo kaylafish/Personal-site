@@ -479,7 +479,19 @@ html.glass-home body { overflow-x: clip; }
   transition: background .25s;
 }
 .glass .g-glass-pill:hover { opacity: 1; background: rgba(255, 255, 255, .14); }
-.g-back-pill { position: fixed; left: 24px; top: 24px; z-index: 60; padding: 10px 16px; font-size: 14px; font-weight: 400; background: rgba(10, 18, 30, .3); }
+
+/* A cover that mustn't be cropped (coverFit: 'contain'), e.g. a drawing:
+   shown whole on the same grid as the 3D heroes. */
+.g-drawing {
+  background-color: #0d1420;
+  background-image:
+    linear-gradient(rgba(140, 160, 190, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140, 160, 190, .07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.g-drawing img { object-fit: contain !important; padding: 0 7%; box-sizing: border-box; }
+.g-tile-feat .g-drawing img { padding: 0 8% 24%; }
+.g-pp-next.g-drawing img { padding: 0 6% 0 40%; }
 
 /* ---------- project card ---------- */
 .g-card { display: block; transition: transform .35s var(--g-ease); }
@@ -580,13 +592,124 @@ html.glass-home body { overflow-x: clip; }
 .g-field-slot > div { will-change: transform; }
 
 /* ===============================================
-   /projects (grid)
+   /projects: sticky rail + tile grid
    =============================================== */
 .g-all { min-height: 100vh; }
-.g-all-main { max-width: 1200px; margin: 0 auto; padding: 120px var(--g-gutter) 120px; }
-.g-all-main .g-sec-head { margin-bottom: 56px; }
-.g-all-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 48px 32px; }
-.glass .g-all-grid .g-card:hover { transform: scale(1.03); }
+.g-all-main {
+  max-width: 1440px; margin: 0 auto; padding: 110px 56px 100px;
+  display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 44px;
+}
+.g-all-rail { position: sticky; top: 110px; align-self: start; display: flex; flex-direction: column; }
+.g-all-head { display: flex; flex-direction: column; gap: 14px; }
+.g-all-title { font-family: var(--g-serif); font-weight: 400; font-size: 76px; line-height: .95; letter-spacing: -.015em; }
+.g-all-title em { font-style: italic; color: #8fb8f7; }
+.g-all-note { font-size: 28px; transform-origin: left; }
+
+/* Year timeline: a 1px line with a dot per year. */
+.g-years {
+  list-style: none; margin: 40px 0 0 5px; padding: 0 0 0 22px;
+  border-left: 1px solid #2e3a4b;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.g-years li { position: relative; display: flex; flex-direction: column; gap: 3px; }
+.g-years li::before {
+  content: ""; position: absolute; left: -27px; top: 10px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #8fb8f7; box-shadow: 0 0 0 4px var(--g-bg);
+}
+.g-years-y { font-family: var(--g-serif); font-size: 30px; line-height: 1; }
+.g-years-n { font-family: var(--g-mono); font-size: 11px; color: var(--g-mute); }
+.g-years li.is-undated::before { background: var(--g-rule-strong); }
+.g-years li.is-undated .g-years-y { color: var(--g-mute); }
+
+.g-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 22px; align-content: start; }
+.g-tile { display: flex; flex-direction: column; gap: 10px; }
+.glass .g-tile:hover { opacity: 1; }
+.g-tile-img {
+  position: relative; width: 100%; aspect-ratio: 4 / 3;
+  border-radius: 16px; overflow: hidden; background: #141c28;
+  box-shadow: 0 22px 50px rgba(0, 0, 0, .45);
+}
+.g-tile-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--g-ease); }
+.g-tile:hover .g-tile-img img { transform: scale(1.04); }
+.g-tile-meta { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.g-tile.is-muted { cursor: default; }
+.g-tile.is-muted .g-tile-meta span:first-child { color: var(--g-mute); }
+
+/* Featured: 2 columns × 2 rows, caption over a bottom gradient. */
+.g-tile-feat { grid-column: span 2; grid-row: span 2; }
+.g-tile-feat .g-tile-img { flex: 1; aspect-ratio: auto; min-height: 400px; border-radius: 22px; }
+.g-tile-feat-cap {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 26px 28px;
+  background: linear-gradient(to top, rgba(11, 17, 27, .88), rgba(11, 17, 27, 0) 60%);
+}
+.g-tile-feat-eyebrow { font-family: var(--g-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #8fb8f7; }
+.g-tile-feat-title { font-family: var(--g-serif); font-size: 46px; line-height: 1; }
+.g-tile-feat-title em { font-style: italic; }
+.g-tile-feat-sum { max-width: 46ch; font-size: 15px; line-height: 1.5; color: var(--g-text-2); }
+
+@media (max-width: 1099px) {
+  .g-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g-tile-feat { grid-row: auto; }
+  .g-tile-feat .g-tile-img { min-height: 360px; }
+}
+
+/* ===============================================
+   NAVBAR on /projects and project pages (pagenav.jsx)
+   Same box as the home page's bar in its navbar form.
+   =============================================== */
+.g-pnav {
+  position: fixed; top: 12px; left: 50%; z-index: 50; transform: translateX(-50%);
+  width: min(calc(100vw - 28px), max(720px, 50vw)); height: 68px; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 0 12px 0 26px; border-radius: 34px;
+  font-family: var(--g-sans, "Geist", system-ui, sans-serif); font-size: 14px; color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 15, 35, .4);
+  background: linear-gradient(170deg, rgba(6, 16, 32, .32), rgba(6, 16, 32, .52));
+  -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, .55),
+    inset 0 -1px 1px rgba(255, 255, 255, .18),
+    inset 0 0 0 1px rgba(255, 255, 255, .14),
+    0 14px 40px rgba(0, 0, 0, .3);
+}
+.g-pnav a { color: #fff; }
+.g-pnav a:hover { opacity: .85; }
+.g-pnav-left { display: flex; align-items: center; min-width: 0; white-space: nowrap; }
+.g-pnav-name {
+  font-family: "Nasalization", sans-serif; font-size: 20px; line-height: 1;
+  text-shadow: 0 2px 12px rgba(0, 15, 35, .35);
+}
+.g-pnav-crumb, .g-pnav-links, .g-pnav-back {
+  overflow: hidden; white-space: nowrap;
+  transition: max-width .45s cubic-bezier(.2, .7, .2, 1), opacity .35s, padding .45s cubic-bezier(.2, .7, .2, 1);
+}
+.g-pnav-crumb { display: flex; align-items: center; gap: 8px; max-width: 0; opacity: 0; padding-left: 0; }
+.g-pnav-crumb > span:first-child { color: var(--g-mute, #8d97a6); }
+.g-pnav-crumb-proj > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.g-pnav-right { display: flex; align-items: center; gap: 4px; flex: none; }
+.g-pnav-links { display: flex; gap: 4px; max-width: 0; opacity: 0; }
+.g-pnav-links a { padding: 10px 14px; border-radius: 999px; }
+.g-pnav-back {
+  max-width: 0; opacity: 0; padding: 10px 0; border-radius: 999px;
+  background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12);
+}
+.g-pnav-resume {
+  margin-left: 6px; padding: 11px 18px; white-space: nowrap;
+  background: #fff; color: var(--g-ink, #0e1c2c) !important; text-shadow: none; font-size: 14px;
+}
+.g-pnav.is-home .g-pnav-links { max-width: 420px; opacity: 1; }
+.g-pnav.is-all .g-pnav-crumb-all,
+.g-pnav.is-project .g-pnav-crumb-all { max-width: 110px; opacity: 1; padding-left: 10px; }
+.g-pnav.is-project .g-pnav-crumb-all a { color: var(--g-text-2, #b9c2cf); }
+.g-pnav.is-project .g-pnav-crumb-proj { max-width: 240px; opacity: 1; padding-left: 8px; }
+.g-pnav.is-all .g-pnav-back,
+.g-pnav.is-project .g-pnav-back { max-width: 100px; opacity: 1; padding: 10px 14px; }
+
+/* Arriving home from /projects or a project: the links grow back in. */
+html.pt-arrive .g-nav-links { animation: pt-links-in .45s cubic-bezier(.2, .7, .2, 1) both; overflow: hidden; white-space: nowrap; }
+@keyframes pt-links-in { from { max-width: 0; opacity: 0; } to { max-width: 420px; opacity: 1; } }
 
 /* ===============================================
    PROJECT PAGE (datasheet)
@@ -601,6 +724,7 @@ html.glass-home body { overflow-x: clip; }
   background-size: 40px 40px;
 }
 .g-pp-hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.g-pp-hero-box { position: absolute; inset: 0; pointer-events: none; }
 .g-pp-hero-fade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11, 17, 27, .7), rgba(11, 17, 27, 0) 50%); }
 /* In the hero the grid shows through, and only the explode control remains. */
 .g-viewer.is-hero { background: none; }
@@ -706,18 +830,34 @@ html.glass-home body { overflow-x: clip; }
   .g-field-slot { position: static; width: auto; }
   .g-field-slot > div { transform: none !important; }
 
-  .g-all-main { padding-top: 96px; }
-  .g-back-pill { left: 14px; top: 14px; }
+  .g-all-main { display: block; padding: 104px var(--g-gutter) 72px; }
+  .g-all-rail { position: static; margin-bottom: 36px; }
+  .g-all-title { font-size: 60px; }
+  /* The timeline turns sideways: the line runs along the top. */
+  .g-years { flex-direction: row; flex-wrap: wrap; gap: 14px 28px; margin: 28px 0 0; padding: 18px 0 0; border-left: 0; border-top: 1px solid #2e3a4b; }
+  .g-years li::before { left: 0; top: -23px; }
+  .g-years-y { font-size: 26px; }
+  .g-tiles { gap: 24px 16px; }
+  .g-tile-feat { grid-column: 1 / -1; }
+  .g-tile-feat .g-tile-img { min-height: 0; aspect-ratio: 4 / 3; }
+  .g-tile-feat-cap { padding: 18px 20px; }
+  .g-tile-feat-title { font-size: 34px; }
+  .g-tile-feat-sum { display: none; }
+
+  .g-pnav { padding-left: 20px; }
+  .g-pnav-crumb, .g-pnav.is-all .g-pnav-crumb-all, .g-pnav.is-project .g-pnav-crumb-all, .g-pnav.is-project .g-pnav-crumb-proj { display: none; }
+  .g-pnav-links { display: none; }
 
   /* Title block moves under the hero. */
   .g-pp-title { position: static; max-width: none; margin: 0; border-radius: 0; grid-template-columns: repeat(3, 1fr); }
   .g-pp-hero { height: auto; display: flex; flex-direction: column; background-image: none; }
   .g-pp-hero > img, .g-pp-hero .g-viewer { position: relative; inset: auto; height: 60vh; flex: none; }
+  .g-pp-hero-box { bottom: auto; height: 60vh; }
   .g-pp-hero-fade { display: none; }
   .g-viewer.is-hero .g-viewer-ui { left: 14px; bottom: 14px; }
 
   /* Contents collapses into a pill with a dropdown, pinned to the top right. */
-  .g-pp-toc { left: auto; right: 14px; top: 14px; width: auto; max-width: calc(100vw - 150px); padding: 0; border-radius: 22px; }
+  .g-pp-toc { left: auto; right: 14px; top: 92px; width: auto; max-width: calc(100vw - 150px); padding: 0; border-radius: 22px; }
   .g-pp-toc-head { pointer-events: auto; margin: 0; padding: 12px 16px; display: flex; gap: 8px; white-space: nowrap; overflow: hidden; }
   .g-pp-toc-head > span:first-child { display: none; }
   .g-pp-toc-current { display: block; overflow: hidden; text-overflow: ellipsis; }
@@ -735,6 +875,12 @@ html.glass-home body { overflow-x: clip; }
   .g-pp-next { height: 200px; margin-top: 64px; }
   .g-pp-next-text { left: 24px; }
 }
+@media (max-width: 480px) {
+  .g-pnav { padding: 0 10px 0 18px; }
+  .g-pnav-name { font-size: 17px; }
+  .g-pnav.is-all .g-pnav-back, .g-pnav.is-project .g-pnav-back { padding: 10px 12px; }
+  .g-pnav-resume { margin-left: 4px; padding: 10px 14px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .g-shelf-pills span { transform: none; transition: opacity .5s ease; }
@@ -742,11 +888,69 @@ html.glass-home body { overflow-x: clip; }
 }
 
 /* ============================================================================
-   PAGE TRANSITIONS (View Transitions API; started in pagelink.jsx)
-   Pages crossfade, and a project's card morphs into its page hero because
-   both carry the same view-transition-name.
+   PAGE TRANSITIONS
+   Home ↔ /projects ↔ project pages are choreographed in transitions.js; the
+   pieces it moves are styled here. Every other page change crossfades with
+   the View Transitions API (pagelink.jsx).
    ============================================================================ */
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .35s; }
-::view-transition-group(*) { animation-duration: .55s; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
-/* Card and hero have different shapes: crop rather than squash on the way. */
-::view-transition-old(*), ::view-transition-new(*) { height: 100%; object-fit: cover; }
+
+/* Fixed layer on <body> that holds the flying cards and the glass sheet. */
+.pt-layer { position: fixed; inset: 0; z-index: 300; pointer-events: none; }
+html.pt-busy .pt-layer { pointer-events: auto; } /* swallow clicks mid-flight */
+.pt-fly, .pt-card, .pt-sheet { position: fixed; overflow: hidden; transform-origin: 50% 50%; will-change: left, top, width, height, transform; }
+.pt-fly { background: #141c28; box-shadow: 0 26px 60px rgba(0, 0, 0, .5); }
+.pt-fly img, .pt-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* The lifted card. .is-glass adds the highlight, rim, sheen and shadow. */
+.pt-card {
+  z-index: 2; background: #111a27;
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, 0), inset 0 0 0 1px rgba(255, 255, 255, .08), 0 0 0 rgba(0, 0, 0, 0);
+}
+.pt-card.is-glass {
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, .6), inset 0 0 0 1px rgba(255, 255, 255, .22), 0 30px 80px rgba(0, 0, 0, .55);
+}
+.pt-card-fade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11, 17, 27, .75), rgba(11, 17, 27, 0) 55%); }
+.pt-card-text {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 4px; white-space: nowrap; color: #eef1f5;
+}
+.pt-card-text span:first-child { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: #b9c2cf; }
+.pt-card-text span:last-child { font-family: "Instrument Serif", serif; font-size: 32px; line-height: 1; }
+.pt-card em, .pt-title em { font-style: italic; }
+/* A drawing cover flying on its own; the card it left loses its caption. */
+.pt-drawing { position: fixed; z-index: 3; transform-origin: 50% 50%; pointer-events: none; }
+.pt-card-fade, .pt-card-text { transition: opacity .25s ease; }
+.pt-card.is-landing .pt-card-fade, .pt-card.is-landing .pt-card-text { opacity: 0; }
+/* The title flying on its own between a card and a page's title. */
+.pt-title {
+  position: fixed; z-index: 3; transform-origin: 0 0; white-space: nowrap;
+  font-family: "Instrument Serif", serif; font-size: 32px; line-height: 1; color: #eef1f5;
+}
+.pt-card-sheen {
+  position: absolute; inset: 0; border-radius: inherit; opacity: 0; transition: opacity .17s ease;
+  background: linear-gradient(155deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 38%);
+}
+.pt-card.is-glass .pt-card-sheen { opacity: 1; }
+
+/* The frosted pane that spreads across the screen. */
+.pt-sheet {
+  z-index: 1; background: rgba(14, 21, 33, .5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5); backdrop-filter: blur(22px) saturate(1.5);
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, .5), inset 0 0 0 1px rgba(255, 255, 255, .14);
+}
+.pt-sheet-sheen { position: absolute; inset: 0; background: linear-gradient(155deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 35%); }
+
+/* The page being left fades out. */
+[data-pt-page] { transition: opacity .18s ease; }
+html.pt-leave [data-pt-page] { opacity: 0; }
+
+/* The page arriving builds in: fade and rise 22 px, 80 ms apart. */
+html.pt-build [data-build] {
+  animation: pt-fade .42s ease both, pt-rise .56s cubic-bezier(.2, .7, .2, 1) both;
+  animation-delay: calc(var(--b, 0) * 80ms);
+}
+/* Coming home only fades, so nothing moves under the landing cards. */
+html.pt-build-fade [data-pt-page] { animation: pt-fade .42s ease both; }
+@keyframes pt-fade { from { opacity: 0; } }
+@keyframes pt-rise { from { transform: translateY(22px); } }

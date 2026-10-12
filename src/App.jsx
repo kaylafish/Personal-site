@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import Nav from './components/nav.jsx';
 import Home from './components/home.jsx';
 import FieldHockey from './components/fieldhockey.jsx';
@@ -7,7 +7,10 @@ import AllProjects from './components/allprojects.jsx';
 import ProjectPage from './components/projectpage.jsx';
 import AllHighlights from './components/allhighlights.jsx';
 import Scrollspy from './components/scrollspy.jsx';
+import PageNav from './components/pagenav.jsx';
 import { usePageNavigate } from './components/pagelink.jsx';
+import { getProject } from './data/projects.js';
+import { locationCommitted, registerNavigate } from './transitions.js';
 
 const FH_SECTIONS = [
   { id: 'fh-top',         label: 'Top' },
@@ -28,6 +31,26 @@ function ScrollManager() {
     window.scrollTo({ top: saved ?? 0, behavior: 'instant' });
   }, [location.pathname]);
   return null;
+}
+
+// Lets transitions.js change routes and know when a new page is in the DOM.
+// Rendered after <Routes> so its layout effect runs once the page's own have.
+function TransitionBridge() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  React.useLayoutEffect(() => { registerNavigate(navigate); }, [navigate]);
+  React.useLayoutEffect(() => { locationCommitted(pathname); }, [pathname]);
+  return null;
+}
+
+// /projects and the datasheet project pages share one navbar, kept mounted
+// between them so it can morph. Bespoke project pages bring their own.
+function usesPageNav(pathname) {
+  const p = pathname.replace(/(.)\/+$/, '$1');
+  if (p === '/projects') return true;
+  const m = p.match(/^\/projects\/([^/]+)$/);
+  const project = m && getProject(decodeURIComponent(m[1]));
+  return !!project && !project.page;
 }
 
 function FieldHockeyPage() {
@@ -89,6 +112,7 @@ function Shell() {
   return (
     <>
       <ScrollManager />
+      {usesPageNav(pathname) && <PageNav />}
       {/* The glass pages (home, projects) bring their own navigation. */}
       {LEGACY_ROUTES.includes(pathname.replace(/\/+$/, '')) && <Nav theme={theme} setTheme={setTheme} />}
       <Routes>
@@ -99,13 +123,16 @@ function Shell() {
         <Route path="/highlights" element={<HighlightsPage />} />
         <Route path="*" element={<Home />} />
       </Routes>
+      <TransitionBridge />
     </>
   );
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
+    // Synchronous route updates: the page transitions need the new page in
+    // the DOM as soon as they navigate.
+    <BrowserRouter unstable_useTransitions={false}>
       <Shell />
     </BrowserRouter>
   );
