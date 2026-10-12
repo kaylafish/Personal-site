@@ -3,6 +3,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { PROJECTS, getProject, projectModel, projectPath } from '../data/projects.js';
 import { MOBILE_QUERY, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
+import RebuiltPage from './rebuiltpage.jsx';
 import ResearchPage from './researchpage.jsx';
 import { loadModelViewer, whenSettled } from '../transitions.js';
 
@@ -74,7 +75,7 @@ function Block({ block, num }) {
 }
 
 // Projects with their own bespoke page (page: '...' in data/projects.js).
-const CUSTOM_PAGES = { research: ResearchPage };
+const CUSTOM_PAGES = { research: ResearchPage, rebuilt: RebuiltPage };
 
 function ProjectPage() {
   const { slug } = useParams();

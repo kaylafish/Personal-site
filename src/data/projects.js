@@ -22,7 +22,8 @@
 //   featured     optional: a short label (e.g. 'Active research'); makes this
 //                the big tile on /projects. One project at a time.
 //   page         optional: 'research' gives the project its own bespoke page
-//                (components/researchpage.jsx) instead of the datasheet below,
+//                (components/researchpage.jsx; 'rebuilt' → rebuiltpage.jsx)
+//                instead of the datasheet below,
 //                which then ignores hero, facts and blocks
 //   blocks       the page body, in any order and any mix:
 //                  { type: 'text',   title, body }
@@ -99,6 +100,7 @@ export const PROJECTS = [
   },
   {
     slug: 'frc-rebuilt',
+    page: 'rebuilt',
     title: 'FRC', titleItalic: 'REBUILT',
     kind: 'Mechanical · 2026', year: '2026',
     cover: '/assets/rebuilt.webp', coverAlt: 'FRC 2026 REBUILT robot',
@@ -106,22 +108,7 @@ export const PROJECTS = [
     facts: [{ label: 'Year', value: '2026' }, { label: 'Role', value: 'Design + build' }, { label: 'Stack', value: 'CAD/CAM' }],
     summary: 'Design, modeling, and manufacturing. Rack-and-pinion intake, rotor serializer, variable-hood turret shooter.',
     links: [],
-    blocks: [
-      { type: 'text', title: 'Summary', body: 'I was responsible for the design, modeling, and manufacturing of the robot.' },
-      { type: 'facts', title: 'Subsystems', rows: [
-        { label: 'Intake', value: 'Rack-and-pinion' },
-        { label: 'Serializer', value: 'Rotor' },
-        { label: 'Shooter', value: 'Variable-hood turret' },
-        { label: 'Drivetrain', value: '[type]', todo: true },
-      ] },
-      { type: 'figure', title: 'CAD', caption: 'CAD render' },
-      { type: 'figure', title: 'Manufacturing', caption: 'Machining photos' },
-      { type: 'figure', title: 'Analysis', caption: 'FEA result' },
-      { type: 'notes', title: 'Notes', items: [
-        { label: 'Hardest part', body: '[...]', todo: true },
-        { label: 'What I’d change', body: '[...]', todo: true },
-      ] },
-    ],
+    blocks: [],
   },
   {
     slug: 'canard-roll-reversal',
