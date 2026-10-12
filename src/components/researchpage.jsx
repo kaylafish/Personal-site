@@ -119,9 +119,11 @@ function Hero() {
           <span className="g-rs-note">(it fights back)</span>
         </div>
         <div ref={card} className="g-rs-hero-card">
-          {HERO_PHOTO.src
-            ? <img src={HERO_PHOTO.src} alt={HERO_PHOTO.alt} />
-            : <div className="g-rs-hero-empty"><span className="is-todo">[Photo: the rocket on the rail, or a canard close-up]</span></div>}
+          {HERO_PHOTO.src && !HERO_PHOTO.drawing && <img src={HERO_PHOTO.src} alt={HERO_PHOTO.alt} />}
+          {HERO_PHOTO.src && HERO_PHOTO.drawing && (
+            <div className="g-rs-hero-empty is-drawing"><img src={HERO_PHOTO.src} alt={HERO_PHOTO.alt} /></div>
+          )}
+          {!HERO_PHOTO.src && <div className="g-rs-hero-empty"><span className="is-todo">[Photo: the rocket on the rail, or a canard close-up]</span></div>}
           <div ref={cap} className="g-rs-hero-cap">
             <span>The vehicle</span>
             <span>104 inches. Four canards. 30–130 m/s.</span>

@@ -134,6 +134,8 @@
   background-size: 40px 40px;
   font-size: 15px;
 }
+.g-rs-hero-empty.is-drawing { padding: 0 6% 12%; box-sizing: border-box; }
+.g-rs-hero-card .g-rs-hero-empty.is-drawing img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
 .g-rs-hero-cap {
   position: absolute; left: 0; right: 0; bottom: 0; opacity: 0; pointer-events: none;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
@@ -364,3 +366,8 @@
 .g-rs-ds-body .g-rs-refs { gap: 14px; font-size: 14px; }
 .g-rs .g-rs-refs a { text-decoration: underline; text-decoration-color: var(--g-rule-strong); text-underline-offset: 3px; }
 .g-rs .g-rs-refs a:hover { color: #fff; text-decoration-color: var(--g-text); }
+/* On phones the drawing stands upright, like a rocket on the rail. */
+@media (max-width: 759px) {
+  .g-rs-hero-empty.is-drawing { padding: 0; container-type: size; }
+  .g-rs-hero-card .g-rs-hero-empty.is-drawing img { flex: none; width: 70cqh; max-height: none; transform: rotate(90deg); translate: 0 -6cqh; }
+}

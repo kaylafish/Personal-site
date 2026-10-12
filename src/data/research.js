@@ -12,8 +12,13 @@
 //     attributed to it; the 95% figure is an oracle upper bound.
 // ============================================================================
 
-// Hero photo. Leave src empty to show an empty frame until there's a photo.
-export const HERO_PHOTO = { src: '', alt: 'The rocket on the launch rail' };
+// Hero image. Leave src empty to show an empty frame. drawing: true shows it
+// whole on the grid background (for line drawings) instead of filling the card.
+export const HERO_PHOTO = {
+  src: '/assets/research/voyager-profile.webp',
+  alt: 'Side profile of the rocket from OpenRocket: nose cone, canards, recovery bays and tail fins',
+  drawing: true,
+};
 
 export const HEADLINE = ['More canard.', 'Less roll.'];
 
