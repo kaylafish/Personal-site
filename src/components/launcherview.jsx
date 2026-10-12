@@ -59,8 +59,11 @@ class LauncherStage {
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     r.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
     r.outputColorSpace = THREE.SRGBColorSpace;
-    r.toneMapping = THREE.ACESFilmicToneMapping;
-    r.toneMappingExposure = 1.05;
+    // Neutral keeps the CAD colours' hues; exposure and lights are well
+    // below Design's original so the white parts don't blow out (same
+    // approach as the REBUILT robot, a little darker).
+    r.toneMapping = THREE.NeutralToneMapping;
+    r.toneMappingExposure = 0.75;
     r.domElement.style.cssText = 'width:100%;height:100%;display:block';
     host.appendChild(r.domElement);
 
@@ -69,10 +72,11 @@ class LauncherStage {
     this.envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     pmrem.dispose();
     this.scene.environment = this.envMap;
-    const key = new THREE.DirectionalLight(0xdfe9ff, 1.5);
+    this.scene.environmentIntensity = 0.5;
+    const key = new THREE.DirectionalLight(0xdfe9ff, 0.9);
     key.position.set(3, 5, 4);
     this.scene.add(key);
-    this.scene.add(new THREE.HemisphereLight(0x9bb8ff, 0x0b111b, 0.6));
+    this.scene.add(new THREE.HemisphereLight(0x9bb8ff, 0x0b111b, 0.25));
     this.cam = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
 
     this.ro = new ResizeObserver(() => this.size());
@@ -174,6 +178,13 @@ class LauncherStage {
       if (!m.isMesh) return;
       m.material = m.material.clone();
       m.userData.hl = false;
+      // Onshape's near-white parts read as aluminum instead of glowing.
+      const { r, g, b } = m.material.color;
+      if (Math.min(r, g, b) > 0.6 && Math.max(r, g, b) - Math.min(r, g, b) < 0.1) {
+        m.material.color.set(0xb4bbc4);
+        m.material.metalness = 0.55;
+        m.material.roughness = 0.45;
+      }
       this.meshes.push(m);
     });
     this.parts.forEach((o) => {
