@@ -10,7 +10,8 @@ const ModelViewer = React.lazy(() => import('./modelviewer.jsx'));
 // ============================================================================
 // PROJECT CHAPTERS — EDIT THIS LIST TO CHANGE THE STORY
 // ----------------------------------------------------------------------------
-// Each chapter scrolls past the sticky photo panel on the left. `slug` ties
+// The three featured projects, strongest first. Everything else is one tap
+// away on /projects. Each chapter scrolls past the sticky photo panel on the left. `slug` ties
 // it to a project in data/projects.js, which supplies the photo, the 3D
 // model (if it has one) and the page "Read the full build" opens.
 // ============================================================================
@@ -35,27 +36,6 @@ const CHAPTERS = [
     title: <>Coyneinator</>,
     body: 'Our San Francisco Regional winner, named for my late mentor, Robin Coyne. A swerve robot with a pivoting elevator, a coaxial differential wrist and a five-joint arm that only ever moves along safe paths.',
     tags: ['Mechanical design', 'Swerve', 'Elevator', 'Differential wrist'],
-  },
-  {
-    slug: 'magnus-effect',
-    eyebrow: '2026 · IB Extended Essay',
-    title: <>The Magnus <em>effect</em></>,
-    body: 'How the lift on a smooth foam ball grows with its spin. I built a two-wheel launcher, filmed 50 shots at 240 fps, and fitted a numerical flight model to the results.',
-    tags: ['RK4', 'χ² fit', 'High-speed video', 'CAD'],
-  },
-  {
-    slug: 'hydro-generator',
-    eyebrow: '2026 · IB Physics HL',
-    title: <>Hydro <em>generator</em></>,
-    body: 'A miniature hydroelectric generator: does a CIM motor’s voltage follow V ∝ √h as the water drops further? The fit gave k = 1.31 ± 0.06, 67% of the ideal, and the write-up explains where the rest went.',
-    tags: ['CNC', '3D printing', 'Data analysis'],
-  },
-  {
-    slug: 'frc-charged-up',
-    eyebrow: '2023 · FRC Charged Up!',
-    title: <>Quetzy</>,
-    body: 'As a freshman I took on programming the entire robot. It gave me my foundation in controls: a finite state machine, 2-DOF arm feedforward, and PID.',
-    tags: ['Java', 'Swerve', 'PathPlanner'],
   },
 ];
 

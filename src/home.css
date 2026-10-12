@@ -452,6 +452,22 @@ html.glass-home body { overflow-x: clip; }
   .g-story-panel, .g-detail { display: none; }
   .g-chapter-img, .g-row-desc { display: block; }
   .g-row-body, .g-row.is-placeholder .g-row-body { opacity: 1; }
+
+  /* Desktop spacing is sized for tall screens; phones get tighter sections. */
+  .g-intro { padding: 96px var(--g-gutter) 80px; }
+  .g-projects { padding-bottom: 56px; }
+  .g-sec-head { margin-bottom: 28px; }
+  .g-chapter { min-height: 0; justify-content: flex-start; gap: 14px; }
+  .g-chapter + .g-chapter { margin-top: 64px; }
+  .g-chapter-img { height: auto; aspect-ratio: 4 / 3; margin-bottom: 6px; }
+  .g-chapter-title { font-size: 44px; }
+  .g-chapter-body { font-size: 17px; }
+  .g-resume { padding: 72px var(--g-gutter) 80px; }
+  .g-contact { padding: 32px var(--g-gutter) 40px; }
+  .g-contact-big { margin-bottom: 40px; }
+}
+@media (max-width: 480px) {
+  .g-contact-big { font-size: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -825,18 +841,19 @@ html.pt-arrive .g-nav-links { animation: pt-links-in .45s cubic-bezier(.2, .7, .
 .g-pp-next-text em { font-style: italic; }
 
 @media (max-width: 799px) {
-  .g-toolkit { margin-bottom: 72px; }
+  .g-toolkit { margin-bottom: 64px; }
   .g-shelf { padding: 28px 22px; border-radius: 24px; min-height: 0; }
   .g-shelf-head h2 { font-size: 36px; }
   .g-shelf-row { grid-template-columns: 1fr; gap: 12px; }
   .g-shelf-pills span { font-size: 15px; padding: 7px 13px; }
 
-  /* The field becomes a plain two-column grid: no motion, no scatter. */
-  .g-more { padding: 40px var(--g-gutter) 0; }
-  .g-field { height: auto; overflow: visible; display: grid; grid-template-columns: 1fr 1fr; gap: 28px 16px; }
-  .g-field-centre { position: static; grid-column: 1 / -1; padding: 24px 0 12px; pointer-events: auto; }
-  .g-field-slot { position: static; width: auto; }
-  .g-field-slot > div { transform: none !important; }
+  /* Stacked, the field would just repeat /projects as a grid, so phones get
+     the line and the button only. */
+  .g-more { padding: 8px var(--g-gutter) 0; }
+  .g-field { height: auto; overflow: visible; }
+  .g-field-centre { position: static; padding: 0; pointer-events: auto; }
+  .g-field-slot { display: none; }
+  .g-field-line { font-size: 52px; text-align: center; }
 
   .g-all-main { display: block; padding: 104px var(--g-gutter) 72px; }
   .g-all-rail { position: static; margin-bottom: 36px; }
