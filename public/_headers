@@ -1,0 +1,4 @@
+# Vite's hashed JS, CSS and font files: a new build changes their names,
+# so browsers can keep them for a year without checking back.
+/_app/*
+  Cache-Control: public, max-age=31536000, immutable
