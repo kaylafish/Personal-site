@@ -481,15 +481,36 @@ function WriteUp() {
 // ---------------------------------------------------------------------------
 
 function Photos() {
+  const row = React.useRef(null);
+  const [ends, setEnds] = React.useState([true, false]);
+  const measure = () => {
+    const el = row.current;
+    if (el) setEnds([el.scrollLeft < 4, el.scrollLeft + el.clientWidth > el.scrollWidth - 4]);
+  };
+  React.useEffect(() => {
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+  const step = (dir) => () => {
+    const el = row.current;
+    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
+  };
   return (
-    <section id="hy-photos" className="g-hy-inner g-hy-photos">
-      <div className="g-hy-head">
-        <span className="g-rs-eyebrow">The build</span>
-        <h3 className="g-hy-hand is-big">From the shop</h3>
+    <section id="hy-photos" className="g-hy-photos">
+      <div className="g-hy-photos-head">
+        <div className="g-hy-head">
+          <span className="g-rs-eyebrow">The build</span>
+          <h3 className="g-hy-hand is-big">From the shop</h3>
+        </div>
+        <div className="g-hy-arrows">
+          <button type="button" onClick={step(-1)} disabled={ends[0]} aria-label="Previous photos">←</button>
+          <button type="button" onClick={step(1)} disabled={ends[1]} aria-label="Next photos">→</button>
+        </div>
       </div>
-      <div className="g-hy-gallery">
+      <div ref={row} className="g-hy-carousel" onScroll={measure} tabIndex={0} aria-label="Build photos">
         {PHOTOS.map((p) => (
-          <figure key={p.src}>
+          <figure key={p.src} style={{ '--ar': p.w / p.h }}>
             <a href={p.src} target="_blank" rel="noreferrer">
               <img src={p.src} alt={p.alt} width={p.w} height={p.h} loading="lazy" decoding="async" />
             </a>
