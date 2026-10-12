@@ -82,8 +82,10 @@ class RigStage {
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     r.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
     r.outputColorSpace = THREE.SRGBColorSpace;
-    r.toneMapping = THREE.ACESFilmicToneMapping;
-    r.toneMappingExposure = 0.8;
+    // Neutral keeps the CAD colours' hues; set darker than the REBUILT
+    // page's robot so the rig doesn't glare on the dark page.
+    r.toneMapping = THREE.NeutralToneMapping;
+    r.toneMappingExposure = 0.75;
     r.domElement.style.cssText = 'width:100%;height:100%;display:block';
     host.appendChild(r.domElement);
 
@@ -92,13 +94,11 @@ class RigStage {
     this.envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     pmrem.dispose();
     this.scene.environment = this.envMap;
-    // Toned down from Design's values so the yellow wheel and pale parts
-    // don't glare on the dark page.
-    this.scene.environmentIntensity = 0.75;
-    const kl = new THREE.DirectionalLight(0xdfe9ff, 1.1);
+    this.scene.environmentIntensity = 0.55;
+    const kl = new THREE.DirectionalLight(0xdfe9ff, 0.9);
     kl.position.set(3, 5, 4);
     this.scene.add(kl);
-    this.scene.add(new THREE.HemisphereLight(0x9bb8ff, 0x0b111b, 0.4));
+    this.scene.add(new THREE.HemisphereLight(0x9bb8ff, 0x0b111b, 0.3));
     this.cam = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
 
     this.ro = new ResizeObserver(() => this.size());
