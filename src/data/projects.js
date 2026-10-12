@@ -17,6 +17,9 @@
 //   facts        exactly three label/value pairs for the title block
 //   summary      one or two sentences
 //   links        [{ label, href }] — optional
+//   page         optional: 'research' gives the project its own bespoke page
+//                (components/researchpage.jsx) instead of the datasheet below,
+//                which then ignores hero, facts and blocks
 //   blocks       the page body, in any order and any mix:
 //                  { type: 'text',   title, body }
 //                  { type: 'facts',  title, rows: [{ label, value }] }
@@ -115,6 +118,19 @@ export const PROJECTS = [
         { label: 'What I’d change', body: '[...]', todo: true },
       ] },
     ],
+  },
+  {
+    slug: 'canard-roll-reversal',
+    page: 'research',
+    title: 'Canard', titleItalic: 'roll reversal',
+    kind: 'Research · Controls', year: '2026',
+    // Swap for a photo of the rocket once there is one (also HERO_PHOTO in data/research.js).
+    cover: '/assets/research/fig3.webp', coverAlt: 'Plot of canard roll against incidence',
+    hero: { type: 'image', src: '/assets/research/fig3.webp' },
+    facts: [{ label: 'Status', value: 'Active' }, { label: 'Method', value: 'LQR · INDI' }, { label: 'Tools', value: 'Python · RocketPy' }],
+    summary: 'Simulation research on keeping a canard-steered rocket in control when its roll authority peaks and then reverses.',
+    links: [{ label: 'Code', href: 'https://github.com/kaylafish/voyager-controller-rocketpy' }],
+    blocks: [],
   },
 ];
 

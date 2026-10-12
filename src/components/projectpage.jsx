@@ -4,6 +4,7 @@ import { PROJECTS, getProject, projectModel, projectPath } from '../data/project
 import { transitionName } from './projectcard.jsx';
 import { MOBILE_QUERY, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
+import ResearchPage from './researchpage.jsx';
 
 // /projects/<slug>: the "datasheet" page. One template for every project,
 // driven by its entry in data/projects.js.
@@ -72,9 +73,17 @@ function Block({ block, num }) {
   }
 }
 
+// Projects with their own bespoke page (page: '...' in data/projects.js).
+const CUSTOM_PAGES = { research: ResearchPage };
+
 function ProjectPage() {
-  useGlassTheme();
   const { slug } = useParams();
+  const Custom = CUSTOM_PAGES[getProject(slug)?.page];
+  return Custom ? <Custom key={slug} /> : <Datasheet key={slug} slug={slug} />;
+}
+
+function Datasheet({ slug }) {
+  useGlassTheme();
   const project = getProject(slug);
   const blockRefs = React.useRef([]);
   const [active, setActive] = React.useState(0);

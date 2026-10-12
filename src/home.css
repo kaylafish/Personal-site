@@ -17,6 +17,11 @@ html.glass-home body {
   color: #eef1f5;
   color-scheme: dark;
 }
+/* styles.css hides horizontal overflow on html and body for phones, which
+   turns body into a scroll container and stops position: sticky working.
+   clip trims the overflow without that side effect. */
+html.glass-home,
+html.glass-home body { overflow-x: clip; }
 
 .glass {
   --g-bg: #0b111b;
