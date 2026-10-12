@@ -23,7 +23,8 @@
 //                the big tile on /projects. One project at a time.
 //   page         optional: 'research' gives the project its own bespoke page
 //                (components/researchpage.jsx; 'rebuilt' → rebuiltpage.jsx;
-//                'magnus' → magnuspage.jsx; 'hydro' → hydropage.jsx)
+//                'magnus' → magnuspage.jsx; 'hydro' → hydropage.jsx;
+//                'coyneinator' → coyneinatorpage.jsx)
 //                instead of the datasheet below,
 //                which then ignores hero, facts and blocks
 //   blocks       the page body, in any order and any mix:
@@ -98,6 +99,19 @@ export const PROJECTS = [
         { label: 'Next revision', body: '[What R02 changes.]', todo: true },
       ] },
     ],
+  },
+  {
+    slug: 'frc-coyneinator',
+    page: 'coyneinator',
+    title: 'FRC', titleItalic: 'Coyneinator',
+    kind: 'Mechanical · 2025', year: '2025',
+    cover: '/assets/coyneinator/team-sf-regional.webp',
+    coverAlt: 'FRC Team 4255 with the 2025 San Francisco Regional winner banner',
+    hero: { type: '3d', src: '/models/coyneinator.glb' },
+    facts: [{ label: 'Year', value: '2025' }, { label: 'Role', value: 'Mechanical design' }, { label: 'Result', value: 'SF Regional winner' }],
+    summary: 'FRC 4255’s 2025 Reefscape robot: a swerve robot with a pivoting elevator, a coaxial differential wrist and a five-joint arm that only ever moves along safe paths.',
+    links: [],
+    blocks: [],
   },
   {
     slug: 'frc-rebuilt',
