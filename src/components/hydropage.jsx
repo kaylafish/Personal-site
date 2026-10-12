@@ -480,13 +480,14 @@ function WriteUp() {
 // 8. Photos of the build (not in the Design handoff; added at the bottom).
 // ---------------------------------------------------------------------------
 
-// The carousel drifts slowly to the left on its own. It stops while the
-// pointer is over it, while it has focus, and for a few seconds after anyone
-// scrolls, swipes or clicks an arrow; at the end it glides back to the start.
+// The carousel drifts slowly to the left on its own from the moment it's on
+// screen. It stops while it has focus or is being swiped, and for a couple of
+// seconds after a sideways scroll, swipe, click or arrow press; at the end it
+// glides back to the start.
 const DRIFT_SPEED = 24; // px per second
-const DRIFT_IDLE = 4000; // ms after an interaction before it moves again
+const DRIFT_IDLE = 2500; // ms after an interaction before it moves again
 function useDrift(ref) {
-  const s = React.useRef({ hover: false, focus: false, until: 0, visible: false, x: 0, rewind: 0 });
+  const s = React.useRef({ touching: false, focus: false, until: 0, visible: false, x: 0, rewind: 0 });
   React.useEffect(() => {
     if (prefersReducedMotion()) return undefined;
     const el = ref.current;
@@ -498,7 +499,7 @@ function useDrift(ref) {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       const max = el.scrollWidth - el.clientWidth;
-      const go = st.visible && !document.hidden && !st.hover && !st.focus && now > st.until && max > 0;
+      const go = st.visible && !document.hidden && !st.touching && !st.focus && now > st.until && max > 0;
       if (go !== wasOn) { wasOn = go; st.x = el.scrollLeft; }
       // Scrolled some other way (a scrollbar, a trackpad): pick up from there.
       if (go && !st.rewind && Math.abs(el.scrollLeft - st.x) > 2) { st.x = el.scrollLeft; }
@@ -526,11 +527,19 @@ function useDrift(ref) {
   return {
     hold,
     handlers: {
-      onPointerEnter: (e) => { if (e.pointerType === 'mouse') s.current.hover = true; },
-      onPointerLeave: () => { s.current.hover = false; hold(); },
-      onPointerDown: hold,
-      onTouchStart: hold,
-      onWheel: hold,
+      // Only sideways gestures pause it: scrolling the page past the photos
+      // (wheel or swipe) shouldn't.
+      onPointerDown: (e) => { if (e.pointerType === 'mouse') hold(); },
+      onWheel: (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) hold(); },
+      onTouchStart: (e) => {
+        const t = e.touches[0];
+        s.current.touch = { x: t.clientX, y: t.clientY };
+      },
+      onTouchMove: (e) => {
+        const t0 = s.current.touch, t = e.touches[0];
+        if (t0 && Math.abs(t.clientX - t0.x) > Math.abs(t.clientY - t0.y)) { s.current.touching = true; hold(); }
+      },
+      onTouchEnd: () => { if (s.current.touching) hold(); s.current.touching = false; s.current.touch = null; },
       onFocus: () => { s.current.focus = true; },
       onBlur: () => { s.current.focus = false; hold(); },
     },
