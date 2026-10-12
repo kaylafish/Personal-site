@@ -1,0 +1,245 @@
+/* =========================================================================
+   FRC REBUILT page (/projects/frc-rebuilt). Scoped to .g-rb, which sits on
+   the same element as .g-rs: the nav, side dots, eyebrows and glow come from
+   research.css. Tokens are on .glass in home.css.
+   ========================================================================= */
+
+.g-rb {
+  --rb-pad: clamp(20px, 6vw, 96px);
+  --rb-cell: rgba(14, 21, 33, .85);
+  --rb-glass-rim: inset 0 1.5px 1px rgba(255, 255, 255, .3), inset 0 0 0 1px rgba(255, 255, 255, .12);
+}
+.g-rb-display {
+  font-family: var(--g-serif); font-weight: 400; line-height: .95; letter-spacing: -.015em;
+  font-size: clamp(46px, 6.4vw, 104px);
+}
+.g-rb-display.is-big { font-size: clamp(52px, 8vw, 128px); line-height: .92; }
+.g-rb-display.is-mid { font-size: clamp(50px, 7.4vw, 124px); line-height: .92; }
+.g-rb-hand {
+  font-family: var(--g-hand); font-weight: 400; line-height: 1;
+  font-size: clamp(38px, 3.6vw, 52px);
+  transform: rotate(-1.5deg); transform-origin: left;
+}
+.g-rb-small { font-size: 13px; line-height: 1.55; color: var(--g-mute); }
+
+/* ---------- 1. the robot ---------- */
+.g-rb-cad { overflow: hidden; }
+.g-rb-robot { position: absolute; inset: 0; z-index: 2; }
+.g-rb-cad-fade {
+  position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; height: 40%; pointer-events: none;
+  background: linear-gradient(to top, var(--g-bg), rgba(11, 17, 27, 0));
+}
+.g-rb-hero, .g-rb-exploded {
+  position: absolute; z-index: 1; left: 0; right: 0; padding: 0 20px; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.g-rb-hero { top: max(92px, 11vh); gap: 10px; }
+.g-rb-hero h1 {
+  font-family: var(--g-serif); font-weight: 400; line-height: .88; letter-spacing: -.015em;
+  font-size: clamp(76px, 13vw, 230px);
+}
+.g-rb-hero-note {
+  display: block; font-family: var(--g-hand); font-size: clamp(28px, 2.8vw, 40px); line-height: 1;
+  color: var(--g-note); transform: rotate(-2deg);
+}
+.g-rb-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+.g-rb-chips span {
+  font-family: var(--g-mono); font-size: 12px; padding: 7px 12px; border-radius: 999px;
+  background: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.g-rb-cue {
+  position: absolute; z-index: 4; left: 50%; bottom: 14px; transform: translateX(-50%); pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-family: var(--g-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--g-text-2);
+}
+.g-rb-exploded { top: max(100px, 14vh); gap: 12px; }
+.g-rb-exploded h2 {
+  font-family: var(--g-serif); font-weight: 400; line-height: .92; letter-spacing: -.015em;
+  font-size: clamp(56px, 8vw, 140px);
+}
+
+/* The spec card on each tour stop. */
+.g-rb-sub {
+  position: absolute; z-index: 4; left: clamp(20px, 6vw, 96px); bottom: clamp(28px, 7vh, 72px);
+  width: min(440px, calc(100vw - 40px)); box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 16px;
+  padding: clamp(20px, 2.4vw, 30px); border-radius: 28px;
+  background: rgba(14, 21, 33, .5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5); backdrop-filter: blur(22px) saturate(1.5);
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, .35), inset 0 0 0 1px rgba(255, 255, 255, .12), 0 24px 60px rgba(0, 0, 0, .35);
+  opacity: 0; transform: translateY(30px); pointer-events: none;
+  transition: opacity .4s, transform .5s var(--g-ease);
+}
+.g-rb-sub.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.g-rb-sub-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.g-rb-sub-dots { display: flex; gap: 6px; }
+.g-rb-sub-dots span { height: 3px; width: 8px; border-radius: 2px; background: var(--g-pill-border); transition: all .3s; }
+.g-rb-sub-dots span.is-lit { background: var(--g-text); }
+.g-rb-sub-dots span.is-now { width: 22px; }
+.g-rb-sub h3 {
+  font-family: var(--g-hand); font-weight: 400; font-size: clamp(38px, 3.6vw, 50px); line-height: 1;
+  transform: rotate(-1.5deg); transform-origin: left;
+}
+.g-rb-sub p { font-size: 16px; line-height: 1.6; color: var(--g-text-2); }
+
+/* Label / value cells, as in the tour card and the state machine readout. */
+.g-rb-specs, .g-rb-readout {
+  display: grid; gap: 1px; overflow: hidden; background: rgba(255, 255, 255, .1);
+}
+.g-rb-specs { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); border-radius: 16px; }
+.g-rb-readout { grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 18px; margin-top: 6px; }
+.g-rb-specs > div, .g-rb-readout > div { display: flex; flex-direction: column; gap: 4px; background: var(--rb-cell); }
+.g-rb-specs > div { padding: 12px 14px; }
+.g-rb-readout > div { padding: 14px 16px; background: rgba(14, 21, 33, .9); }
+.g-rb-specs span:first-child, .g-rb-readout span:first-child {
+  font-family: var(--g-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--g-mute);
+}
+.g-rb-specs span:last-child, .g-rb-readout span:last-child { font-size: 15px; color: var(--g-text); }
+.g-rb-readout span.is-rest, .g-rb-specs span.is-todo { color: var(--g-mute); font-style: normal; }
+
+/* ---------- 2. numbers ---------- */
+.g-rb-stats {
+  position: relative; max-width: 1300px; margin: 0 auto; box-sizing: border-box;
+  padding: 10vh clamp(20px, 5vw, 64px);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px;
+}
+.g-rb-stat {
+  container-type: inline-size;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 24px;
+  min-height: 200px; padding: clamp(22px, 2.6vw, 34px); border-radius: 28px;
+  background: rgba(255, 255, 255, .05);
+  box-shadow: var(--rb-glass-rim), 0 20px 50px rgba(0, 0, 0, .25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5); backdrop-filter: blur(22px) saturate(1.5);
+}
+.g-rb-stat > span:first-child { font-size: 15px; line-height: 1.45; color: var(--g-text-2); }
+.g-rb-stat-num { font-family: var(--g-serif); font-size: clamp(48px, 26cqi, 104px); line-height: .9; white-space: nowrap; }
+.g-rb-stat-num small { font-size: .42em; color: var(--g-mute); }
+
+/* ---------- 3. master sketch ---------- */
+.g-rb-sketch, .g-rb-drive {
+  position: relative; margin: 0 auto; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 22px;
+}
+.g-rb-sketch { max-width: 1300px; padding: 8vh var(--rb-pad); }
+.g-rb-sketch > p, .g-rb-drive > p { max-width: 58ch; font-size: clamp(16px, 1.4vw, 19px); line-height: 1.6; color: var(--g-text-2); }
+.g-rb-drive > p { max-width: 56ch; }
+.g-rb-frame {
+  width: 100%; margin-top: 12px; padding: clamp(8px, 1.2vw, 14px); box-sizing: border-box; border-radius: 28px;
+  background: rgba(255, 255, 255, .04);
+  box-shadow: var(--rb-glass-rim), 0 30px 80px rgba(0, 0, 0, .35);
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+}
+.g-rb-frame img { width: 100%; height: auto; display: block; border-radius: 20px; }
+
+/* ---------- 4. software ---------- */
+.g-rb-code {
+  position: relative; max-width: 1200px; margin: 0 auto; box-sizing: border-box;
+  padding: 12vh var(--rb-pad) 6vh; display: flex; flex-direction: column; gap: 22px;
+}
+.g-rb-code > p { max-width: 60ch; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; color: var(--g-text-2); }
+
+/* ---------- 5. state machine ---------- */
+.g-rb-ladder { position: relative; }
+.g-rb-ladder.is-pinned { height: 260vh; }
+.g-rb-ladder-inner {
+  position: relative; max-width: 1300px; margin: 0 auto; box-sizing: border-box;
+  padding: 48px var(--rb-pad) 32px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: clamp(24px, 4vw, 56px); align-items: center;
+}
+.g-rb-ladder.is-pinned .g-rb-ladder-inner { position: sticky; top: 0; min-height: 100vh; padding-top: 96px; }
+.g-rb-ladder-text { display: flex; flex-direction: column; gap: 16px; }
+.g-rb-ladder-text .g-rb-hand { font-size: clamp(40px, 4vw, 58px); }
+.g-rb-ladder-text > p { max-width: 46ch; font-size: 16px; line-height: 1.6; color: var(--g-text-2); }
+.g-rb-ladder-note { font-size: 13px; line-height: 1.5; color: var(--g-mute); }
+.g-rb-modes { display: flex; flex-direction: column; gap: 6px; }
+.g-rb .g-rb-mode {
+  display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 14px;
+  width: 100%; box-sizing: border-box; padding: 14px 18px; border: 0; border-radius: 16px;
+  font: inherit; color: var(--g-text); text-align: left;
+  background: rgba(255, 255, 255, .025); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05);
+  opacity: .62; transition: all .35s var(--g-ease);
+}
+.g-rb button.g-rb-mode { cursor: pointer; }
+.g-rb .g-rb-mode.is-past { opacity: .42; }
+.g-rb .g-rb-mode.is-on {
+  opacity: 1; background: rgba(255, 255, 255, .08);
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, .3), inset 0 0 0 1px rgba(255, 255, 255, .14), 0 16px 40px rgba(0, 0, 0, .3);
+}
+.g-rb-ladder.is-pinned .g-rb-mode.is-on { transform: translateX(-14px); }
+.g-rb-mode-n { font-family: var(--g-mono); font-size: 13px; color: var(--g-mute); }
+.g-rb-mode-name {
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+  font-family: var(--g-mono); font-size: clamp(13px, 1.2vw, 16px); font-weight: 500; letter-spacing: .04em;
+}
+.g-rb-mode-name span { width: 6px; height: 22px; border-radius: 3px; flex: none; }
+.g-rb-mode-when { font-size: 13px; color: var(--g-text-2); text-align: right; }
+
+/* ---------- 6. driver controls ---------- */
+.g-rb-drive { max-width: 1200px; padding: 10vh var(--rb-pad) 4vh; }
+.g-rb-controls {
+  width: 100%; margin-top: 14px; text-align: left;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 12px;
+}
+.g-rb-controls > div {
+  display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 20px;
+  background: rgba(255, 255, 255, .05);
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, .22), inset 0 0 0 1px rgba(255, 255, 255, .1);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+}
+.g-rb-controls > div.is-stick { background: rgba(91, 156, 245, .08); }
+.g-rb-key {
+  flex: none; min-width: 44px; height: 44px; padding: 0 10px; box-sizing: border-box; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--g-mono); font-size: 13px; font-weight: 500;
+  background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2);
+}
+.g-rb-controls > div > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.g-rb-controls > div > span:last-child span:first-child { font-size: 16px; color: var(--g-text); }
+.g-rb-controls > div > span:last-child span:last-child { font-size: 13px; line-height: 1.4; color: var(--g-mute); }
+.g-rb-drive > .g-rb-small { line-height: normal; }
+
+/* ---------- 7. aiming charts ---------- */
+.g-rb-aim {
+  position: relative; max-width: 1200px; margin: 0 auto; box-sizing: border-box;
+  padding: 8vh var(--rb-pad); display: flex; flex-direction: column; gap: clamp(64px, 10vh, 120px);
+}
+.g-rb-chart { display: flex; flex-direction: column; gap: 22px; }
+.g-rb-chart-text { display: flex; flex-direction: column; gap: 14px; }
+.g-rb-chart-text p { font-size: 16px; line-height: 1.6; color: var(--g-text-2); }
+.g-rb-chart-text p.g-rb-aside { font-size: 14px; line-height: 1.55; color: var(--g-mute); }
+.g-rb-chart-img { display: block; border-radius: 20px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
+.g-rb-chart-img img { width: 100%; height: auto; display: block; }
+.g-rb-badge {
+  align-self: flex-start; font-family: var(--g-mono); font-size: 11px; letter-spacing: .08em;
+  padding: 7px 12px; border-radius: 999px; color: var(--rs-amber); box-shadow: inset 0 0 0 1px rgba(217, 164, 65, .45);
+}
+.g-rb-aim > .g-rb-small { max-width: 70ch; }
+
+/* ---------- 8. making it ---------- */
+.g-rb-make { position: relative; background: #0e1726; border-top: 1px solid rgba(255, 255, 255, .06); }
+.g-rb-make-inner {
+  max-width: 1300px; margin: 0 auto; box-sizing: border-box; padding: 14vh var(--rb-pad);
+  display: flex; flex-direction: column; gap: clamp(28px, 5vh, 48px);
+}
+.g-rb-make-text { display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
+.g-rb-make-text .g-rb-display { font-size: clamp(46px, 6vw, 96px); }
+.g-rb-make-text p { font-size: clamp(17px, 1.4vw, 20px); line-height: 1.6; color: var(--g-text-2); }
+.g-rb-gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.g-rb-gallery img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 20px; display: block; scroll-snap-align: center; }
+/* Phones: a swipeable row that runs to the screen edges. */
+@media (max-width: 759px) {
+  .g-rb-gallery {
+    grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 80%;
+    overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    margin: 0 calc(-1 * var(--rb-pad)); padding: 0 var(--rb-pad);
+  }
+}
+
+.g-rb-foot {
+  position: relative; max-width: 1300px; margin: 0 auto; box-sizing: border-box;
+  padding: 56px var(--rb-pad) 80px; border-top: 1px solid var(--g-rule);
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px;
+  font-family: var(--g-mono); font-size: 12px; color: var(--g-mute);
+}

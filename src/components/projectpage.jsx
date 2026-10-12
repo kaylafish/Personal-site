@@ -4,6 +4,7 @@ import { PROJECTS, getProject, projectModel, projectPath } from '../data/project
 import { transitionName } from './projectcard.jsx';
 import { MOBILE_QUERY, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
+import RebuiltPage from './rebuiltpage.jsx';
 import ResearchPage from './researchpage.jsx';
 
 // /projects/<slug>: the "datasheet" page. One template for every project,
@@ -74,7 +75,7 @@ function Block({ block, num }) {
 }
 
 // Projects with their own bespoke page (page: '...' in data/projects.js).
-const CUSTOM_PAGES = { research: ResearchPage };
+const CUSTOM_PAGES = { research: ResearchPage, rebuilt: RebuiltPage };
 
 function ProjectPage() {
   const { slug } = useParams();
