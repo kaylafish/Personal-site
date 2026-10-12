@@ -4,6 +4,7 @@ import { PROJECTS, getProject, projectModel, projectPath } from '../data/project
 import { MOBILE_QUERY, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
 import HydroPage from './hydropage.jsx';
+import MagnusPage from './magnuspage.jsx';
 import RebuiltPage from './rebuiltpage.jsx';
 import ResearchPage from './researchpage.jsx';
 import { loadModelViewer, whenSettled } from '../transitions.js';
@@ -76,7 +77,7 @@ function Block({ block, num }) {
 }
 
 // Projects with their own bespoke page (page: '...' in data/projects.js).
-const CUSTOM_PAGES = { research: ResearchPage, rebuilt: RebuiltPage, hydro: HydroPage };
+const CUSTOM_PAGES = { research: ResearchPage, rebuilt: RebuiltPage, magnus: MagnusPage, hydro: HydroPage };
 
 function ProjectPage() {
   const { slug } = useParams();

@@ -23,7 +23,7 @@
 //                the big tile on /projects. One project at a time.
 //   page         optional: 'research' gives the project its own bespoke page
 //                (components/researchpage.jsx; 'rebuilt' → rebuiltpage.jsx;
-//                'hydro' → hydropage.jsx)
+//                'magnus' → magnuspage.jsx; 'hydro' → hydropage.jsx)
 //                instead of the datasheet below,
 //                which then ignores hero, facts and blocks
 //   blocks       the page body, in any order and any mix:
@@ -108,6 +108,19 @@ export const PROJECTS = [
     hero: { type: '3d', src: '/models/rebuilt.glb', note: 'CAD assembly, exported from Onshape' },
     facts: [{ label: 'Year', value: '2026' }, { label: 'Role', value: 'Design + build' }, { label: 'Stack', value: 'CAD/CAM' }],
     summary: 'Design, modeling, and manufacturing. Rack-and-pinion intake, rotor serializer, variable-hood turret shooter.',
+    links: [],
+    blocks: [],
+  },
+  {
+    slug: 'magnus-effect',
+    page: 'magnus',
+    title: 'Magnus', titleItalic: 'effect',
+    kind: 'Physics · 2026', year: '2026',
+    cover: '/assets/magnus/apparatus-cad.webp', coverFit: 'contain',
+    coverAlt: 'CAD of the two-wheel ball launcher',
+    hero: { type: 'image', src: '/assets/magnus/apparatus-cad.webp' },
+    facts: [{ label: 'Year', value: '2026' }, { label: 'Type', value: 'IB Extended Essay' }, { label: 'Method', value: 'RK4 · χ² fit' }],
+    summary: 'How the lift on a smooth foam ball grows with its spin. I built a two-wheel launcher, filmed 50 shots at 240 fps, and fitted a numerical flight model to the results.',
     links: [],
     blocks: [],
   },
