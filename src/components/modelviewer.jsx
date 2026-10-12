@@ -1,9 +1,8 @@
 import React from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { loadModel } from './threeutil.js';
 
 // Interactive 3D model for the Projects panel. Loaded lazily (see
 // projects.jsx), so three.js stays out of the main bundle.
@@ -15,8 +14,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 // Files are optimized with meshopt (see the notes in projects.jsx).
 async function loadGlb(src, up) {
-  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-  const gltf = await loader.loadAsync(src);
+  const gltf = await loadModel(src);
   const scene = gltf.scene;
   if (up === 'z') scene.rotation.x = -Math.PI / 2; // CAD tools are often Z-up
 

@@ -1,11 +1,9 @@
 import React from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { prefersReducedMotion } from './motion.jsx';
-import { disposeTree, partKey as key } from './threeutil.js';
+import { disposeTree, partKey as key, loadModel } from './threeutil.js';
 
 // Quetzy (FRC 4255, 2023) for the top of its project page (quetzypage.jsx),
 // on a transparent canvas. Ported from Claude Design's quetzy-view.js; loaded
@@ -107,15 +105,13 @@ class QuetzyStage {
     this.onVis = () => this.wake();
     document.addEventListener('visibilitychange', this.onVis);
 
-    new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
+    loadModel(src, (f) => this.cb.onProgress?.(f)).then((g) => {
       if (this.dead) { disposeTree(g.scene); return; }
       this.setup(g.scene);
       disposeTree(g.scene);
       if (prefersReducedMotion()) this.cur.explode = 0;
       this.sig = null;
       this.cb.onLoaded?.();
-    }, (e) => {
-      if (e.total) this.cb.onProgress?.(e.loaded / e.total);
     }, (err) => console.warn('Quetzy model failed to load', err));
     this.raf = 0;
     this.last = 0;

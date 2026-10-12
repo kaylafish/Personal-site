@@ -1,10 +1,8 @@
 import React from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { disposeTree, toFloat } from './threeutil.js';
+import { disposeTree, toFloat, loadModel } from './threeutil.js';
 
 // The Magnus launcher for its pinned scroll section (magnuspage.jsx), on a
 // transparent canvas. Ported from Claude Design's launcher-view.js. Loaded
@@ -72,10 +70,10 @@ class LauncherStage {
     this.onVis = () => this.wake();
     document.addEventListener('visibilitychange', this.onVis);
 
-    new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
+    loadModel(src).then((g) => {
       if (this.dead) disposeTree(g.scene);
       else this.setup(g.scene);
-    }, undefined, (err) => console.warn('Launcher model failed to load', err));
+    }, (err) => console.warn('Launcher model failed to load', err));
 
     this.raf = 0;
     this.last = 0;
