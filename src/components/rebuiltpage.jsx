@@ -6,6 +6,7 @@ import {
 import { ProgressBar } from './home.jsx';
 import { clamp, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
+import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
 import '../rebuilt.css';
 
@@ -66,17 +67,20 @@ const CHAPTERS = [
   ['rb-ladder', 'State machine'], ['rb-drive', 'Driving it'], ['rb-aim', 'Aiming'], ['rb-make', 'Making it'],
 ];
 
+// Back to /projects with the reverse of the card-opening transition.
+const toAll = (e) => { e.preventDefault(); goBackTo('/projects'); };
+
 function Nav() {
   return (
     <nav className="g-rs-nav" aria-label="Site">
       <div className="g-rs-nav-left">
         <PageLink to="/" className="g-rs-nav-name">Mikayla Fisher</PageLink>
         <div className="g-rs-crumb">
-          <span>/</span><PageLink to="/#projects">Projects</PageLink><span>/</span><span>REBUILT</span>
+          <span>/</span><a href="/projects" onClick={toAll}>Projects</a><span>/</span><span>REBUILT</span>
         </div>
       </div>
       <div className="g-rs-nav-right">
-        <PageLink to="/#projects" className="g-rs-nav-link is-all"><span>←</span>All projects</PageLink>
+        <a href="/projects" onClick={toAll} className="g-rs-nav-link is-all"><span>←</span>All projects</a>
         <a href={RESUME_URL} download={RESUME_FILENAME} className="g-rs-nav-cta is-wide">Résumé ↗</a>
       </div>
     </nav>
@@ -145,12 +149,17 @@ function CadTour({ narrow }) {
     setTimeout(() => overlay.remove(), 520);
   }, []);
 
+  // The model loads once the opening transition has landed: loading
+  // three.js mid-flight would freeze the motion.
+  const [settled, setSettled] = React.useState(false);
+  React.useLayoutEffect(() => whenSettled(() => setSettled(true)), []);
+
   const touring = stage >= 0;
   const sub = SUBSYSTEMS[Math.max(0, stage)];
   return (
     <section id="rb-cad" ref={ref} className="g-rs-pin" style={{ height: `${(2 + N) * 100 + 60}vh` }}>
       <div className="g-rs-sticky g-rb-cad">
-        <SkipOnError>
+        {settled && <SkipOnError>
           <React.Suspense fallback={null}>
             <RobotExplode
               className="g-rb-robot"
@@ -163,7 +172,7 @@ function CadTour({ narrow }) {
               lift={narrow && touring ? 0.2 : 0}
             />
           </React.Suspense>
-        </SkipOnError>
+        </SkipOnError>}
         <div className="g-rb-cad-fade" />
 
         {/* Behind the transparent canvas, so the robot stands in front of it. */}
@@ -411,7 +420,7 @@ function RebuiltPage() {
         <Aiming />
         <Making />
         <footer className="g-rb-foot">
-          <PageLink to="/#projects">← All projects</PageLink>
+          <a href="/projects" onClick={toAll}>← All projects</a>
           <span>© 2026 Mikayla Fisher</span>
         </footer>
       </main>
