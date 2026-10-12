@@ -40,7 +40,7 @@ function Tile({ project }) {
   const muted = !project.cover;
   return (
     <a href={projectPath(project.slug)} onClick={open(project.slug)} className={`g-tile ${muted ? 'is-muted' : ''}`}>
-      <div className="g-tile-img" data-pt-tile={project.slug}>
+      <div className={`g-tile-img ${project.coverFit === 'contain' ? 'g-drawing' : ''}`} data-pt-tile={project.slug}>
         {project.cover && <img src={project.cover} alt={project.coverAlt} />}
       </div>
       <div className="g-tile-meta" data-build="" style={{ '--b': 2 }}>
@@ -78,7 +78,7 @@ function AllProjects() {
         <div className="g-tiles">
           {featured && (
             <a href={projectPath(featured.slug)} onClick={open(featured.slug)} className="g-tile g-tile-feat">
-              <div className="g-tile-img" data-pt-tile={featured.slug}>
+              <div className={`g-tile-img ${featured.coverFit === 'contain' ? 'g-drawing' : ''}`} data-pt-tile={featured.slug}>
                 <img src={featured.cover} alt={featured.coverAlt} />
                 <div className="g-tile-feat-cap" data-build="" style={{ '--b': 2 }}>
                   <span className="g-tile-feat-eyebrow">

@@ -480,6 +480,19 @@ html.glass-home body { overflow-x: clip; }
 }
 .glass .g-glass-pill:hover { opacity: 1; background: rgba(255, 255, 255, .14); }
 
+/* A cover that mustn't be cropped (coverFit: 'contain'), e.g. a drawing:
+   shown whole on the same grid as the 3D heroes. */
+.g-drawing {
+  background-color: #0d1420;
+  background-image:
+    linear-gradient(rgba(140, 160, 190, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140, 160, 190, .07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.g-drawing img { object-fit: contain !important; padding: 0 7%; box-sizing: border-box; }
+.g-tile-feat .g-drawing img { padding: 0 8% 24%; }
+.g-pp-next.g-drawing img { padding: 0 6% 0 40%; }
+
 /* ---------- project card ---------- */
 .g-card { display: block; transition: transform .35s var(--g-ease); }
 .glass .g-card:hover { opacity: 1; transform: scale(1.05); }
@@ -904,6 +917,12 @@ html.pt-busy .pt-layer { pointer-events: auto; } /* swallow clicks mid-flight */
 }
 .pt-card-text span:first-child { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: #b9c2cf; }
 .pt-card-text span:last-child { font-family: "Instrument Serif", serif; font-size: 32px; line-height: 1; }
+.pt-card em, .pt-title em { font-style: italic; }
+/* The title flying on its own between a card and a page's title. */
+.pt-title {
+  position: fixed; z-index: 3; transform-origin: 0 0; white-space: nowrap;
+  font-family: "Instrument Serif", serif; font-size: 32px; line-height: 1; color: #eef1f5;
+}
 .pt-card-sheen {
   position: absolute; inset: 0; border-radius: inherit; opacity: 0; transition: opacity .17s ease;
   background: linear-gradient(155deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 38%);

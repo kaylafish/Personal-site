@@ -34,7 +34,7 @@ function ProjectCard({ project }) {
         openProject(project.slug, imgRef.current);
       }}
     >
-      <div ref={imgRef} className="g-card-img" data-pt-field={project.slug}>
+      <div ref={imgRef} className={`g-card-img ${project.coverFit === 'contain' ? 'g-drawing' : ''}`} data-pt-field={project.slug}>
         <img src={project.cover} alt={project.coverAlt} loading="lazy" />
       </div>
       <div className="g-card-meta">

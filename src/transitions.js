@@ -14,7 +14,9 @@
 // Pages mark what takes part:
 //   data-pt-field="<slug>"   a card image in the home field
 //   data-pt-tile="<slug>"    a tile image on /projects
-//   data-pt-hero             the project page's hero
+//   data-pt-hero             the project page's hero, when it's an image
+//   data-pt-title            the project page's title, where the card's
+//                            caption lands when there's no hero to land in
 //   data-pt-page             content that fades out as a page leaves
 //   data-build (+ --b: n)    content that fades and rises in, n × 80 ms late
 //
@@ -147,6 +149,7 @@ function hide(el) {
 function flyer(project, box, rad) {
   const el = document.createElement('div');
   el.className = 'pt-fly';
+  if (project?.coverFit === 'contain') el.classList.add('g-drawing');
   if (project?.cover) {
     const img = document.createElement('img');
     img.src = project.cover;
@@ -166,12 +169,60 @@ function glassCard(project, box, rad) {
     + '<div class="pt-card-text"><span></span><span></span></div><div class="pt-card-sheen"></div>';
   const img = el.querySelector('img');
   if (project.cover) img.src = project.cover; else img.remove();
+  if (project.coverFit === 'contain') el.classList.add('g-drawing');
   const [sub, title] = el.querySelectorAll('.pt-card-text span');
   sub.textContent = project.kind || '';
-  title.textContent = `${project.title} ${project.titleItalic || ''}`.trim();
+  fillTitle(title, project);
   place(el, box, { rad });
   getLayer().appendChild(el);
   return el;
+}
+
+// "FRC <em>REBUILT</em>", as the pages set it.
+function fillTitle(el, project) {
+  el.textContent = `${project.title} `;
+  if (project.titleItalic) {
+    const em = document.createElement('em');
+    em.textContent = project.titleItalic;
+    el.appendChild(em);
+  }
+}
+
+// The project's name on its own, for pages whose hero isn't there to land
+// in (a 3D model still loading, a hero below the fold). It flies between the
+// card's caption and the page's title.
+function titleClone(project) {
+  const el = document.createElement('div');
+  el.className = 'pt-title';
+  fillTitle(el, project);
+  getLayer().appendChild(el);
+  return el;
+}
+
+// Where a title clone sits to cover el, a text element: scaled to its font
+// size and aligned the way its text is.
+function titleSpot(clone, el) {
+  const r = el.getBoundingClientRect();
+  const cs = getComputedStyle(el);
+  const s = parseFloat(cs.fontSize) / 32;
+  const w = clone.offsetWidth * s;
+  const h = clone.offsetHeight * s;
+  const x = cs.textAlign === 'center' ? r.left + (r.width - w) / 2 : r.left;
+  return { x, y: r.top + Math.max(0, (Math.min(r.height, parseFloat(cs.lineHeight) || r.height) - h) / 2), s };
+}
+
+function placeTitle(el, spot) {
+  Object.assign(el.style, { left: `${spot.x}px`, top: `${spot.y}px`, transform: `scale(${spot.s})` });
+}
+
+// The page's hero, if it's there to land in right away: an image (not a
+// model that has yet to load) with at least half of it on screen.
+function landingHero() {
+  const el = document.querySelector('[data-pt-hero]');
+  if (!el) return null;
+  const b = boxOf(el);
+  const seen = Math.min(b.y + b.h, window.innerHeight) - Math.max(b.y, 0);
+  return seen >= Math.min(b.h, window.innerHeight) * 0.5 ? b : null;
 }
 
 function sheetEl(box, rad) {
@@ -308,20 +359,46 @@ async function sheetOpen(slug, originEl, change) {
     await routeChange(change, () => startBuild());
     await frame();
 
-    // Land: the card flies into the hero; the sheet clears.
-    const heroEl = document.querySelector('[data-pt-hero]');
-    const h = heroEl ? boxOf(heroEl) : { x: o.x, y: o.y, w: o.w, h: o.h, rot: 0 };
-    card.style.transition = trans(['left', 'top', 'width', 'height', 'transform', 'border-radius'], D * 0.42);
-    place(card, { ...h, rot: 0 }, { rad: 24 });
+    const h = landingHero();
+    const titleEl = document.querySelector('[data-pt-title]');
     sheet.style.transition = trans(['opacity'], D * 0.45, 'ease');
     sheet.style.opacity = '0';
 
-    // Settle: glass and opacity go to 0, revealing the real hero.
-    await wait(D * 0.42);
-    card.style.transition = trans(['opacity', 'box-shadow', 'background'], D * 0.22, 'ease');
-    card.classList.remove('is-glass');
-    card.style.opacity = '0';
-    await wait(D * 0.24);
+    if (h || !titleEl) {
+      // Land: the card flies into the hero; the sheet clears.
+      const to = h || { x: o.x, y: o.y, w: o.w, h: o.h, rot: 0 };
+      card.style.transition = trans(['left', 'top', 'width', 'height', 'transform', 'border-radius'], D * 0.42);
+      place(card, { ...to, rot: 0 }, { rad: 24 });
+
+      // Settle: glass and opacity go to 0, revealing the real hero.
+      await wait(D * 0.42);
+      card.style.transition = trans(['opacity', 'box-shadow', 'background'], D * 0.22, 'ease');
+      card.classList.remove('is-glass');
+      card.style.opacity = '0';
+      await wait(D * 0.24);
+    } else {
+      // No hero to land in yet: the glass clears, and only the card's
+      // title flies on, into the page's title.
+      const caption = card.querySelector('.pt-card-text span:last-child');
+      const clone = titleClone(project);
+      const r = caption.getBoundingClientRect();
+      placeTitle(clone, { x: r.left, y: r.top, s: r.width / clone.offsetWidth });
+      card.querySelector('.pt-card-text').style.visibility = 'hidden';
+      hide(titleEl);
+      await frame();
+      clone.style.transition = trans(['left', 'top', 'transform'], D * 0.5);
+      placeTitle(clone, titleSpot(clone, titleEl));
+      card.style.transition = trans(['opacity', 'transform'], D * 0.36, 'ease');
+      card.style.opacity = '0';
+      place(card, { ...o, rot: 0 }, { s: 1.12, dy: -10 });
+
+      await wait(D * 0.5);
+      cleanups.forEach((fn) => fn()); // real title back under the copy
+      cleanups = [];
+      clone.style.transition = trans(['opacity'], D * 0.22, 'ease');
+      clone.style.opacity = '0';
+      await wait(D * 0.24);
+    }
     finish();
   } catch (err) { bail(err); }
 }
@@ -330,20 +407,34 @@ async function sheetClose(slug, toPath, change) {
   const project = getProject(slug);
   begin();
   try {
-    const heroEl = document.querySelector('[data-pt-hero]');
-    const h = heroEl ? boxOf(heroEl) : { ...viewport(), x: window.innerWidth * 0.2, w: window.innerWidth * 0.6 };
-    const card = glassCard(project, { ...h, rot: 0 }, 24);
-    card.style.opacity = '0';
+    const h = landingHero();
+    const titleEl = document.querySelector('[data-pt-title]');
+    const byTitle = !h && !!titleEl;
     const sheet = sheetEl(viewport(), 0);
+    let card = null;
+    let clone = null;
+    if (byTitle) {
+      // Reverse of the title-only arrival: the title lifts off the page.
+      clone = titleClone(project);
+      placeTitle(clone, titleSpot(clone, titleEl));
+      hide(titleEl);
+    } else if (h) {
+      card = glassCard(project, { ...h, rot: 0 }, 24);
+      card.style.opacity = '0';
+    }
+    // With neither, it's the reverse of a plain glass fade: the glass comes
+    // in and the card only appears at the far end.
     await frame();
 
     // The sheet fades in over the page; the hero lifts out as a glass card.
     sheet.style.transition = trans(['opacity'], D * 0.28, 'ease');
     sheet.style.opacity = '1';
-    card.style.transition = trans(['transform', 'box-shadow', 'background', 'opacity'], D * 0.28);
-    card.classList.add('is-glass');
-    card.style.opacity = '1';
-    place(card, { ...h, rot: 0 }, { s: 1.04 });
+    if (card) {
+      card.style.transition = trans(['transform', 'box-shadow', 'background', 'opacity'], D * 0.28);
+      card.classList.add('is-glass');
+      card.style.opacity = '1';
+      place(card, { ...h, rot: 0 }, { s: 1.04 });
+    }
     setTimeout(leavePage, D * 0.2);
 
     await wait(D * 0.42);
@@ -360,14 +451,37 @@ async function sheetClose(slug, toPath, change) {
       : `[data-pt-field="${CSS.escape(slug)}"]`);
     const t = target && boxOf(target);
     if (onScreen(t)) {
+      cleanups.forEach((fn) => fn());
+      cleanups = [];
       hide(target);
       const rad = parseFloat(getComputedStyle(target).borderTopLeftRadius) || 16;
       const props = ['left', 'top', 'width', 'height', 'transform', 'border-radius'];
-      card.style.transition = trans(props, D * 0.42);
-      place(card, t, { rad });
       sheet.style.transition = trans(props, D * 0.42);
       place(sheet, t, { rad });
-      await wait(D * 0.42);
+      if (!card) {
+        // The glass card gathers at the target (and the title, if it lifted
+        // off the page, drops into its caption).
+        card = glassCard(project, t, rad);
+        card.classList.add('is-glass');
+        card.style.opacity = '0';
+        const text = card.querySelector('.pt-card-text');
+        const r = text.lastElementChild.getBoundingClientRect();
+        if (clone) text.style.visibility = 'hidden';
+        await frame();
+        card.style.transition = trans(['opacity'], D * 0.3, 'ease');
+        card.style.opacity = '1';
+        if (clone) {
+          clone.style.transition = trans(['left', 'top', 'transform'], D * 0.42);
+          placeTitle(clone, { x: r.left, y: r.top, s: r.width / clone.offsetWidth });
+        }
+        await wait(D * 0.42);
+        text.style.visibility = '';
+        if (clone) clone.remove();
+      } else {
+        card.style.transition = trans(props, D * 0.42);
+        place(card, t, { rad });
+        await wait(D * 0.42);
+      }
       card.style.transition = trans(['opacity', 'box-shadow', 'background'], D * 0.22, 'ease');
       card.classList.remove('is-glass');
       sheet.style.transition = trans(['opacity'], D * 0.22, 'ease');
@@ -380,8 +494,11 @@ async function sheetClose(slug, toPath, change) {
     } else {
       // Nowhere on screen to land (e.g. the project was opened from the
       // home page's story): just let the glass clear.
-      card.style.transition = sheet.style.transition = trans(['opacity'], D * 0.42, 'ease');
-      card.style.opacity = sheet.style.opacity = '0';
+      [card, clone, sheet].forEach((el) => {
+        if (!el) return;
+        el.style.transition = trans(['opacity'], D * 0.42, 'ease');
+        el.style.opacity = '0';
+      });
       await wait(D * 0.44);
     }
     finish();

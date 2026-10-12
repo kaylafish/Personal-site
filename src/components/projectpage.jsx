@@ -138,8 +138,9 @@ function Datasheet({ slug }) {
 
       <main>
         <header className={`g-pp-hero ${model ? 'is-3d' : ''}`}>
-          {/* Where the opening card lands (transitions.js). */}
-          <div className="g-pp-hero-box" data-pt-hero="" aria-hidden="true" />
+          {/* Where the opening card lands (transitions.js). A 3D model takes a
+              moment to load, so those pages take the card's title instead. */}
+          {!model && <div className="g-pp-hero-box" data-pt-hero="" aria-hidden="true" />}
           {model ? (
             <React.Suspense fallback={null}>
               <ModelViewer key={project.slug} hero {...model} />
@@ -153,7 +154,7 @@ function Datasheet({ slug }) {
           <div className="g-pp-title">
             <div className="g-pp-title-top" data-build="" style={{ '--b': 0 }}>
               <span>{project.kind}</span>
-              <h1>{project.title} <em>{project.titleItalic}</em></h1>
+              <h1 data-pt-title="">{project.title} <em>{project.titleItalic}</em></h1>
             </div>
             {project.facts.map((f) => (
               <div key={f.label} className="g-pp-title-cell" data-build="" style={{ '--b': 1 }}>
@@ -183,7 +184,7 @@ function Datasheet({ slug }) {
             </section>
           ))}
 
-          <PageLink to={projectPath(next.slug)} className="g-pp-next">
+          <PageLink to={projectPath(next.slug)} className={`g-pp-next ${next.coverFit === 'contain' ? 'g-drawing' : ''}`}>
             <img src={next.cover} alt="" loading="lazy" />
             <div className="g-pp-next-fade" />
             <div className="g-pp-next-text">
