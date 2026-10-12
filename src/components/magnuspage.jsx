@@ -205,7 +205,9 @@ function Launcher() {
     const r = ref.current.getBoundingClientRect();
     const sp = clamp(-r.top / Math.max(1, r.height - window.innerHeight));
     const si = Math.min(TOUR.length - 1, Math.floor(sp * TOUR.length));
-    Object.assign(view.current, TOUR[si].view, { yaw: 0.55 + sp * 2.4 });
+    // On wide screens the launcher moves right to clear the text on the left.
+    const shift = window.matchMedia('(max-width: 759px)').matches ? 0 : 0.2;
+    Object.assign(view.current, TOUR[si].view, { yaw: 0.55 + sp * 2.4, shift });
     setStep(si);
   });
 

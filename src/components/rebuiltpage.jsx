@@ -168,7 +168,7 @@ function CadTour({ narrow }) {
               explode={stage === EXPLODED ? 1 : 0}
               focus={touring ? sub.node : ''}
               spin={touring ? 0.18 : 0.1}
-              shift={!narrow && touring ? 0.14 : 0}
+              shift={!narrow && touring ? 0.18 : 0}
               lift={narrow && touring ? 0.2 : 0}
             />
           </React.Suspense>
