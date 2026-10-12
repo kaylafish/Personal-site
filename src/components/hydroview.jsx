@@ -5,7 +5,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { prefersReducedMotion } from './motion.jsx';
-import { disposeTree, partKey as key } from './threeutil.js';
+import { disposeTree, partKey as key, toFloat } from './threeutil.js';
 
 // The hydro generator rig for the top of its project page (hydropage.jsx),
 // on a transparent canvas. Ported from Claude Design's hydro-view.js; loaded
@@ -45,9 +45,12 @@ function mergeParts(main) {
     part.traverse((m) => {
       if (!m.isMesh || !m.geometry || m.isInstancedMesh) return;
       const mat = m.material;
-      const g = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
-      Object.keys(g.attributes).forEach((a) => { if (a !== 'position' && a !== 'normal') g.deleteAttribute(a); });
-      if (!g.attributes.normal) g.computeVertexNormals();
+      const src = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry;
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', toFloat(src.attributes.position));
+      if (src.attributes.normal) g.setAttribute('normal', toFloat(src.attributes.normal));
+      else g.computeVertexNormals();
+      if (src !== m.geometry) src.dispose();
       g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld));
       if (!groups.has(mat.uuid)) groups.set(mat.uuid, { mat, gs: [] });
       groups.get(mat.uuid).gs.push(g);
