@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { disposeTree } from './threeutil.js';
 
 // The Magnus launcher for its pinned scroll section (magnuspage.jsx), on a
 // transparent canvas. Ported from Claude Design's launcher-view.js. Loaded
@@ -40,14 +41,6 @@ function toFloat(attr) {
     if (n > 3) out[i * n + 3] = attr.getW(i);
   }
   return new THREE.BufferAttribute(out, n);
-}
-
-function disposeTree(root) {
-  root.traverse((o) => {
-    if (!o.isMesh) return;
-    o.geometry.dispose();
-    [].concat(o.material).forEach((m) => m.dispose());
-  });
 }
 
 class LauncherStage {

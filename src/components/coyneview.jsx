@@ -5,6 +5,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { prefersReducedMotion } from './motion.jsx';
+import { disposeTree, partKey as key } from './threeutil.js';
 
 // The 2025 Coyneinator for the top of its project page (coyneinatorpage.jsx),
 // on a transparent canvas. Ported from Claude Design's coyne-view.js; loaded
@@ -23,7 +24,6 @@ import { prefersReducedMotion } from './motion.jsx';
 // Subsystems are the top assembly's children (GROUP); the elevator is split
 // into its pivoting stages at load.
 
-const key = (n) => (n || '').toLowerCase().replace(/occurrence.?of.?/, '').replace(/[^a-z0-9]/g, '');
 const GROUP = { assembly11: 'drive', assembly12: 'elev', assembly21: 'wrist', assembly13: 'intake', assembly31: 'climb' };
 // Focus configs:
 //   g      groups shown          solo   hide every other group
@@ -52,14 +52,6 @@ const CFG = {
 const FOCI = Object.keys(CFG);
 const PIVOT = [0, 0.3, -0.265]; // pivot axis (x) through the big sector gear, model coords
 const HL = new THREE.Color(0x3b86f0);
-
-function disposeTree(root) {
-  root.traverse((o) => {
-    if (!o.isMesh) return;
-    o.geometry.dispose();
-    [].concat(o.material).forEach((m) => m.dispose());
-  });
-}
 
 // Merge-ready copy of a geometry: indexed, float position/normal/uv only
 // (meshopt stores them quantized).

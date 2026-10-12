@@ -27,7 +27,7 @@
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Caprasimo&family=DM+Serif+Display:ital@0;1&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Caprasimo&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
 <script>
   // Set theme before first paint to avoid a light→dark flash.
   (function() {
@@ -43,13 +43,12 @@
       document.documentElement.classList.add('glass-home');
     }
   })();
-  // Site-wide appearance. Change these to re-skin the site.
-  // system: "editorial" | "technical" | "bold" | "playful"
+  // Appearance of the legacy field-hockey pages (/fieldhockey, /highlights).
+  // styles.css only carries the "playful" system now.
   // theme:  "cream" (light) | "ink" (dark) — overridden by the user's toggle
   window.SITE = {
     system: "playful",
     theme: "cream",
-    cardStyle: "card",
     fontScale: 0.9,
     primaryAccent: "#166534",
     fieldHockeyAccent: "#0f4c5c"
