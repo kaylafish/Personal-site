@@ -4,7 +4,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { buildRocket } from './r01model.js';
 
 // Interactive 3D model for the Projects panel. Loaded lazily (see
 // projects.jsx), so three.js stays out of the main bundle.
@@ -13,8 +12,6 @@ import { buildRocket } from './r01model.js';
 // itself, and builds the explode slider from the file's parts: each one slides
 // away from the model's middle along its longest axis. A file with a single
 // part just gets no slider.
-
-const BUILTIN = { r01: buildRocket };
 
 // Files are optimized with meshopt (see the notes in projects.jsx).
 async function loadGlb(src, up) {
@@ -75,7 +72,7 @@ function disposeModel(model) {
 
 // `hero` is the project-page variant: no wheel zoom (the page has to scroll
 // past it) and only the explode control, since the page already names it.
-function ModelViewer({ src, builtin, up, label, note, hero = false }) {
+function ModelViewer({ src, up, label, note, hero = false }) {
   const hostRef = React.useRef(null);
   const sliderRef = React.useRef(null);
   const explodeRef = React.useRef({ cur: 1, target: 0 });
@@ -164,8 +161,7 @@ function ModelViewer({ src, builtin, up, label, note, hero = false }) {
     const ex = explodeRef.current;
     ex.cur = 1; ex.target = 0;
 
-    const build = src ? loadGlb(src, up) : Promise.resolve((BUILTIN[builtin] || buildRocket)());
-    build.then(({ model, parts }) => {
+    loadGlb(src, up).then(({ model, parts }) => {
       if (!live) { disposeModel(model); return; }
       loaded = model;
       const apply = (t) => {
@@ -227,7 +223,7 @@ function ModelViewer({ src, builtin, up, label, note, hero = false }) {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [src, builtin, up, hero]);
+  }, [src, up, hero]);
 
   const onSlide = (e) => {
     const ex = explodeRef.current;

@@ -16,25 +16,46 @@ const ModelViewer = React.lazy(() => import('./modelviewer.jsx'));
 // ============================================================================
 const CHAPTERS = [
   {
+    slug: 'canard-roll-reversal',
+    eyebrow: '2026 · Active research',
+    title: <>More canard, <em>less roll.</em></>,
+    body: 'Canards steer a rocket from the nose, but on this one their wake hits the tail fins. Past about 5° the roll they make shrinks, and past 7° it reverses. My research, in simulation, is how to keep the rocket in roll control through that.',
+    tags: ['Python', 'RocketPy', 'LQR', 'INDI'],
+  },
+  {
+    slug: 'frc-rebuilt',
+    eyebrow: '2026 · FRC REBUILT',
+    title: <>REBUILT</>,
+    body: 'I was responsible for the design, modeling, and manufacturing: a rack-and-pinion intake, a rotor for serializing game pieces, and a variable-hood shooter on a turret.',
+    tags: ['CAD/CAM', 'Machining', 'FEA', 'Simulation'],
+  },
+  {
+    slug: 'frc-coyneinator',
+    eyebrow: '2025 · FRC Reefscape',
+    title: <>Coyneinator</>,
+    body: 'Our San Francisco Regional winner, named for my late mentor, Robin Coyne. A swerve robot with a pivoting elevator, a coaxial differential wrist and a five-joint arm that only ever moves along safe paths.',
+    tags: ['Mechanical design', 'Swerve', 'Elevator', 'Differential wrist'],
+  },
+  {
+    slug: 'magnus-effect',
+    eyebrow: '2026 · IB Extended Essay',
+    title: <>The Magnus <em>effect</em></>,
+    body: 'How the lift on a smooth foam ball grows with its spin. I built a two-wheel launcher, filmed 50 shots at 240 fps, and fitted a numerical flight model to the results.',
+    tags: ['RK4', 'χ² fit', 'High-speed video', 'CAD'],
+  },
+  {
+    slug: 'hydro-generator',
+    eyebrow: '2026 · IB Physics HL',
+    title: <>Hydro <em>generator</em></>,
+    body: 'A miniature hydroelectric generator: does a CIM motor’s voltage follow V ∝ √h as the water drops further? The fit gave k = 1.31 ± 0.06, 67% of the ideal, and the write-up explains where the rest went.',
+    tags: ['CNC', '3D printing', 'Data analysis'],
+  },
+  {
     slug: 'frc-charged-up',
     eyebrow: '2023 · FRC Charged Up!',
     title: <>Quetzy</>,
     body: 'As a freshman I took on programming the entire robot. It gave me my foundation in controls: a finite state machine, 2-DOF arm feedforward, and PID.',
     tags: ['Java', 'Swerve', 'PathPlanner'],
-  },
-  {
-    slug: 'r01',
-    eyebrow: 'Model rocket R01',
-    title: <>Custom designed rocket</>,
-    body: 'My first rocket design, flown on a G80 motor. It reached an apogee of 3,000 feet. Open the 3D view to take it apart.',
-    tags: ['C++', 'Rocket design', '3D model'],
-  },
-  {
-    slug: 'frc-rebuilt',
-    eyebrow: '2026 · FRC REBUILT',
-    title: <>The big RC</>,
-    body: 'I was responsible for the design, modeling, and manufacturing: a rack-and-pinion intake, a rotor for serializing game pieces, and a variable-hood shooter on a turret.',
-    tags: ['CAD/CAM', 'Machining', 'FEA', 'Simulation'],
   },
 ];
 
@@ -102,7 +123,8 @@ function Projects() {
       <div className="g-story">
         <div ref={panelRef} className="g-story-panel">
           {chapters.map((c, i) => (
-            <img key={c.slug} src={c.project.cover} alt={c.project.coverAlt} loading="lazy" className={i === active ? 'is-on' : ''} />
+            <img key={c.slug} src={c.project.cover} alt={c.project.coverAlt} loading="lazy"
+              className={`${i === active ? 'is-on' : ''} ${c.project.coverFit === 'contain' ? 'is-drawing' : ''}`} />
           ))}
           {show3d && (
             <React.Suspense fallback={null}>
@@ -129,7 +151,8 @@ function Projects() {
         <div id="projects" className="g-chapters">
           {chapters.map((c, i) => (
             <article key={c.slug} ref={(el) => { chapterRefs.current[i] = el; }} className="g-chapter">
-              <img src={c.project.cover} alt={c.project.coverAlt} loading="lazy" className="g-chapter-img" />
+              <img src={c.project.cover} alt={c.project.coverAlt} loading="lazy"
+                className={`g-chapter-img ${c.project.coverFit === 'contain' ? 'is-drawing' : ''}`} />
               <span className="g-chapter-eyebrow">{c.eyebrow}</span>
               <h3 className="g-chapter-title">{c.title}</h3>
               <p className="g-chapter-body">{c.body}</p>

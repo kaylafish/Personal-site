@@ -9,7 +9,6 @@ import { clamp, go, useScrollFrame } from './motion.jsx';
 // ============================================================================
 const SLIDES = [
   { src: '/assets/quetzy.webp',   alt: 'FRC 2023 robot at the MHS Open House',      label: 'FRC 2023 Charged Up!',   cap: 'MHS Open House' },
-  { src: '/assets/project.webp',  alt: 'Model rocket R01 at the Rocketry Club fair', label: 'Model rocket R01',       cap: 'Rocketry Club fair' },
   { src: '/assets/rebuilt.webp',  alt: 'FRC 2026 REBUILT robot during testing',      label: 'FRC 2026 REBUILT robot', cap: 'Robot undergoing testing' },
   { src: '/assets/campus.webp',   alt: 'WPI campus',                                 label: 'WPI, class of 2030',     cap: 'Worcester, MA' },
   { src: '/assets/portrait.webp', alt: 'Mikayla Fisher',                             label: "That's me",              cap: 'Mikayla Fisher', pos: '50% 30%' },
