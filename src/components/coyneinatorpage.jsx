@@ -4,7 +4,7 @@ import {
   COG_FACTS, GRAPH_NOTES, GRAPH_STATS, HOPS, IDLE, MEMORIAL, MORE, ROBIN_PHOTOS, STATUS, TEAM_PHOTO, TOUR,
 } from '../data/coyneinator.js';
 import { ProgressBar } from './home.jsx';
-import { clamp, useGlassTheme, useScrollFrame } from './motion.jsx';
+import { clamp, easeInOutCubic, prefersReducedMotion, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
 import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
@@ -49,11 +49,11 @@ const pinProgress = (el) => {
   return clamp(-r.top / Math.max(1, r.height - window.innerHeight));
 };
 
-function jumpTo(id, offset = 80) {
+function jumpTo(id) {
   return (e) => {
     if (e) e.preventDefault();
     const el = document.getElementById(id);
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
   };
 }
 
@@ -462,10 +462,75 @@ function Team() {
   );
 }
 
+// Scrolling down anywhere above the robot's hero glides straight to it,
+// so the tribute hands over to the robot in one move. Wheel, swipe and
+// keys all count; while the glide runs, further input is swallowed so it
+// isn't fought by trackpad momentum. Scrolling up is left alone.
+const GLIDE_MS = 900;
+function glideTo(y) {
+  if (prefersReducedMotion()) { window.scrollTo(0, y); return GLIDE_MS / 4; }
+  const y0 = window.scrollY, t0 = performance.now();
+  const step = (now) => {
+    const t = clamp((now - t0) / GLIDE_MS);
+    window.scrollTo(0, y0 + (y - y0) * easeInOutCubic(t));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+  return GLIDE_MS;
+}
+function useTributeGlide(targetId) {
+  const busy = React.useRef(0);
+  const go = React.useCallback(() => {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    busy.current = performance.now() + glideTo(el.getBoundingClientRect().top + window.scrollY) + 150;
+  }, [targetId]);
+  React.useEffect(() => {
+    const target = () => {
+      const el = document.getElementById(targetId);
+      return el ? el.getBoundingClientRect().top + window.scrollY : 0;
+    };
+    const gliding = () => performance.now() < busy.current;
+    const above = () => window.scrollY < target() - 4;
+    const onWheel = (e) => {
+      if (gliding()) { e.preventDefault(); return; }
+      if (e.deltaY > 0 && Math.abs(e.deltaY) > Math.abs(e.deltaX) && above()) { e.preventDefault(); go(); }
+    };
+    let y0 = null;
+    const onTouchStart = (e) => { y0 = e.touches.length === 1 ? e.touches[0].clientY : null; };
+    const onTouchMove = (e) => {
+      if (gliding()) { e.preventDefault(); return; }
+      if (y0 == null || !above()) return;
+      if (y0 - e.touches[0].clientY > 8) { e.preventDefault(); y0 = null; go(); }
+    };
+    const onKey = (e) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const t = e.target;
+      if (t && (t.isContentEditable || /^(input|textarea|select)$/i.test(t.tagName) || t.getAttribute?.('role') === 'slider')) return;
+      const down = e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey);
+      if (!down) return;
+      if (gliding()) { e.preventDefault(); return; }
+      if (above()) { e.preventDefault(); go(); }
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [targetId, go]);
+  return go;
+}
+
 // The page opens on the tribute: the robot is named for Robin Coyne. Quiet
 // on purpose: the photos sit still; only the scroll cue's arrow moves.
 function Tribute() {
   const [before, after] = MEMORIAL.split('Robin Coyne');
+  const glide = useTributeGlide('cy-robot');
   return (
     <section id="cy-tribute" className="g-cy-tribute" aria-labelledby="cy-tribute-text">
       <div className="g-cy-tribute-inner">
@@ -478,7 +543,7 @@ function Tribute() {
           ))}
         </div>
       </div>
-      <a href="#cy-robot" onClick={jumpTo('cy-robot', 0)} className="g-cy-named" data-build="" style={{ '--b': 3 }}>
+      <a href="#cy-robot" onClick={(e) => { e.preventDefault(); glide(); }} className="g-cy-named" data-build="" style={{ '--b': 3 }}>
         <span>Our 2025 Reefscape robot, named:</span>
         <span className="g-cy-named-arrow" aria-hidden="true">↓</span>
       </a>
