@@ -23,7 +23,7 @@
 //                the big tile on /projects. One project at a time.
 //   page         optional: 'research' gives the project its own bespoke page
 //                (components/researchpage.jsx; 'rebuilt' → rebuiltpage.jsx;
-//                'magnus' → magnuspage.jsx)
+//                'magnus' → magnuspage.jsx; 'hydro' → hydropage.jsx)
 //                instead of the datasheet below,
 //                which then ignores hero, facts and blocks
 //   blocks       the page body, in any order and any mix:
@@ -121,6 +121,18 @@ export const PROJECTS = [
     hero: { type: 'image', src: '/assets/magnus/apparatus-cad.webp' },
     facts: [{ label: 'Year', value: '2026' }, { label: 'Type', value: 'IB Extended Essay' }, { label: 'Method', value: 'RK4 · χ² fit' }],
     summary: 'How the lift on a smooth foam ball grows with its spin. I built a two-wheel launcher, filmed 50 shots at 240 fps, and fitted a numerical flight model to the results.',
+    links: [],
+    blocks: [],
+  },
+  {
+    slug: 'hydro-generator',
+    page: 'hydro',
+    title: 'Hydro', titleItalic: 'generator',
+    kind: 'Physics · 2026', year: '2026',
+    cover: '/assets/hydro/rig-bench.webp', coverAlt: 'The hydro generator rig on a workbench',
+    hero: { type: 'image', src: '/assets/hydro/rig-bench.webp' },
+    facts: [{ label: 'Course', value: 'IB Physics HL' }, { label: 'Result', value: 'k = 1.31 ± 0.06' }, { label: 'Built with', value: 'CNC · 3D print' }],
+    summary: 'A miniature hydroelectric generator for my IB Physics IA: does a CIM motor’s voltage follow V ∝ √h as the water drops further?',
     links: [],
     blocks: [],
   },
