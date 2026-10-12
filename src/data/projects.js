@@ -22,7 +22,8 @@
 //   featured     optional: a short label (e.g. 'Active research'); makes this
 //                the big tile on /projects. One project at a time.
 //   page         optional: 'research' gives the project its own bespoke page
-//                (components/researchpage.jsx; 'rebuilt' → rebuiltpage.jsx)
+//                (components/researchpage.jsx; 'rebuilt' → rebuiltpage.jsx;
+//                'hydro' → hydropage.jsx)
 //                instead of the datasheet below,
 //                which then ignores hero, facts and blocks
 //   blocks       the page body, in any order and any mix:
@@ -107,6 +108,18 @@ export const PROJECTS = [
     hero: { type: '3d', src: '/models/rebuilt.glb', note: 'CAD assembly, exported from Onshape' },
     facts: [{ label: 'Year', value: '2026' }, { label: 'Role', value: 'Design + build' }, { label: 'Stack', value: 'CAD/CAM' }],
     summary: 'Design, modeling, and manufacturing. Rack-and-pinion intake, rotor serializer, variable-hood turret shooter.',
+    links: [],
+    blocks: [],
+  },
+  {
+    slug: 'hydro-generator',
+    page: 'hydro',
+    title: 'Hydro', titleItalic: 'generator',
+    kind: 'Physics · 2026', year: '2026',
+    cover: '/assets/hydro/rig-bench.webp', coverAlt: 'The hydro generator rig on a workbench',
+    hero: { type: 'image', src: '/assets/hydro/rig-bench.webp' },
+    facts: [{ label: 'Course', value: 'IB Physics HL' }, { label: 'Result', value: 'k = 1.31 ± 0.06' }, { label: 'Built with', value: 'CNC · 3D print' }],
+    summary: 'A miniature hydroelectric generator for my IB Physics IA: does a CIM motor’s voltage follow V ∝ √h as the water drops further?',
     links: [],
     blocks: [],
   },
