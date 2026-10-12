@@ -5,6 +5,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { prefersReducedMotion } from './motion.jsx';
+import { disposeTree, partKey as key } from './threeutil.js';
 
 // Quetzy (FRC 4255, 2023) for the top of its project page (quetzypage.jsx),
 // on a transparent canvas. Ported from Claude Design's quetzy-view.js; loaded
@@ -21,7 +22,6 @@ import { prefersReducedMotion } from './motion.jsx';
 // The GLB is the Onshape export (Z-up, palette texture), simplified to
 // 0.3 mm per part. Subsystems are found by name.
 
-const key = (n) => (n || '').toLowerCase().replace(/occurrence.?of.?/, '').replace(/[^a-z0-9]/g, '');
 const grpOf = (n) => {
   const k = key(n);
   return /drivetrain/.test(k) ? 'drive' : /0200arm|arm1$/.test(k) ? 'arm' : /intake/.test(k) ? 'intake' : 'misc';
@@ -29,14 +29,6 @@ const grpOf = (n) => {
 const FOCI = ['', 'drive', 'arm', 'intake'];
 const MAG = { drive: 0, arm: 0.55, intake: 0.7, misc: 0.3 };
 const HARDWARE = /screw|bolt|nut|washer|rivet|shcs|bhcs|fhcs|nutstrip|bearing|spacer/;
-
-function disposeTree(root) {
-  root.traverse((o) => {
-    if (!o.isMesh) return;
-    o.geometry.dispose();
-    [].concat(o.material).forEach((m) => { m.map?.dispose(); m.dispose(); });
-  });
-}
 
 // Float copy of an attribute (meshopt stores them quantized).
 function toFloat(at, size) {

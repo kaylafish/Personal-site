@@ -9,7 +9,7 @@ export const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 
 export const MOBILE_QUERY = '(max-width: 799px)';
 
 // In-page links scroll with a 70px offset so sections clear the glass navbar.
-export function scrollToId(id) {
+function scrollToId(id) {
   const el = document.getElementById(id);
   if (!el) return;
   const top = id === 'top' ? 0 : el.getBoundingClientRect().top + window.scrollY - 70;

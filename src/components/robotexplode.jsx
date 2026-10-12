@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { easeInOutCubic, prefersReducedMotion } from './motion.jsx';
+import { disposeTree } from './threeutil.js';
 
 // The REBUILT robot for the top of its project page (rebuiltpage.jsx), on a
 // transparent canvas so the page shows through. Loaded lazily, so three.js
@@ -53,17 +54,6 @@ function textureColor(mesh, cache) {
   const o = (iy * px.w + ix) * 4;
   const c = mesh.material.color || { r: 1, g: 1, b: 1 };
   return [px.d[o] / 255 * c.r, px.d[o + 1] / 255 * c.g, px.d[o + 2] / 255 * c.b];
-}
-
-function disposeTree(root) {
-  root.traverse((o) => {
-    if (!o.isMesh) return;
-    o.geometry.dispose();
-    [].concat(o.material).forEach((m) => {
-      Object.values(m).forEach((v) => { if (v && v.isTexture) v.dispose(); });
-      m.dispose();
-    });
-  });
 }
 
 class RobotStage {

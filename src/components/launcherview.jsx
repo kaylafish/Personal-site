@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { disposeTree, toFloat } from './threeutil.js';
 
 // The Magnus launcher for its pinned scroll section (magnuspage.jsx), on a
 // transparent canvas. Ported from Claude Design's launcher-view.js. Loaded
@@ -30,25 +31,6 @@ const POLY = /part.?1[0-2]$/i;
 const WHEEL = /colson.?performa.?wheel/i;
 const BALL = /game.?piece/i;
 
-// meshopt stores positions and normals quantized; merging needs floats.
-function toFloat(attr) {
-  const n = attr.itemSize, out = new Float32Array(attr.count * n);
-  for (let i = 0; i < attr.count; i++) {
-    out[i * n] = attr.getX(i);
-    if (n > 1) out[i * n + 1] = attr.getY(i);
-    if (n > 2) out[i * n + 2] = attr.getZ(i);
-    if (n > 3) out[i * n + 3] = attr.getW(i);
-  }
-  return new THREE.BufferAttribute(out, n);
-}
-
-function disposeTree(root) {
-  root.traverse((o) => {
-    if (!o.isMesh) return;
-    o.geometry.dispose();
-    [].concat(o.material).forEach((m) => m.dispose());
-  });
-}
 
 class LauncherStage {
   constructor(host, src, view) {

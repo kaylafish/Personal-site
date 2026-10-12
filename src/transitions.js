@@ -34,7 +34,7 @@ const STAGGER = 40;                          // ms between flying cards
 const BUILD_MS = 640 + 3 * 80;               // longest data-build animation
 
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-export const canAnimate = () => typeof document !== 'undefined' && !!document.startViewTransition && !reduced();
+const canAnimate = () => typeof document !== 'undefined' && !!document.startViewTransition && !reduced();
 
 const html = () => document.documentElement;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));

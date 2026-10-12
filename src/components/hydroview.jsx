@@ -2,8 +2,10 @@ import React from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { prefersReducedMotion } from './motion.jsx';
+import { disposeTree, partKey as key, toFloat } from './threeutil.js';
 
 // The hydro generator rig for the top of its project page (hydropage.jsx),
 // on a transparent canvas. Ported from Claude Design's hydro-view.js; loaded
@@ -19,10 +21,9 @@ import { prefersReducedMotion } from './motion.jsx';
 //   shift   moves the rig right by this share of the width
 // On load the rig starts exploded and assembles itself.
 //
-// The GLB is the Onshape export (Z-up, plain, not Draco). Parts are the
+// The GLB is the Onshape export (Z-up), meshopt-compressed. Parts are the
 // assembly's children and are sorted by name and colour at load.
 
-const key = (n) => (n || '').toLowerCase().replace(/occurrence.?of.?/, '').replace(/[^a-z0-9]/g, '');
 // Turn with the wheel: its shaft, the 36T pulley and the parts on the shaft
 // (the wheel itself is the yellow material).
 const SHAFT = /12thunderhex75|36thtd|3dpadapter|acetalspacer|spacerstack/;
@@ -32,14 +33,6 @@ const MSPIN = /24thtd|8mmto12in/;
 const DRIVE = /cimmotor|belt/;
 // The three drop heights, in metres above the wheel centre.
 const HEIGHTS = [0.35, 0.6, 0.85];
-
-function disposeTree(root) {
-  root.traverse((o) => {
-    if (!o.isMesh) return;
-    o.geometry.dispose();
-    [].concat(o.material).forEach((m) => m.dispose());
-  });
-}
 
 // One mesh per material in each part, so a few hundred draw calls become a
 // few dozen.
@@ -52,9 +45,12 @@ function mergeParts(main) {
     part.traverse((m) => {
       if (!m.isMesh || !m.geometry || m.isInstancedMesh) return;
       const mat = m.material;
-      const g = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
-      Object.keys(g.attributes).forEach((a) => { if (a !== 'position' && a !== 'normal') g.deleteAttribute(a); });
-      if (!g.attributes.normal) g.computeVertexNormals();
+      const src = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry;
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', toFloat(src.attributes.position));
+      if (src.attributes.normal) g.setAttribute('normal', toFloat(src.attributes.normal));
+      else g.computeVertexNormals();
+      if (src !== m.geometry) src.dispose();
       g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld));
       if (!groups.has(mat.uuid)) groups.set(mat.uuid, { mat, gs: [] });
       groups.get(mat.uuid).gs.push(g);
@@ -112,7 +108,7 @@ class RigStage {
     this.onVis = () => this.wake();
     document.addEventListener('visibilitychange', this.onVis);
 
-    new GLTFLoader().load(src, (g) => {
+    new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
       if (this.dead) disposeTree(g.scene);
       else this.setup(g.scene);
     }, undefined, (err) => console.warn('Hydro model failed to load', err));
