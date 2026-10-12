@@ -30,9 +30,9 @@ const clamp01 = (v) => Math.min(1, Math.max(0, v));
 // Parts move SPREAD × robot size per unit of a subsystem's explode distance.
 const SPREAD = 0.32;
 
-// Average brightness of the texture under a mesh (the export colours parts
-// through one palette texture), or null if it can't be read.
-function textureLum(mesh, cache) {
+// The colour of the texture under a mesh as [r, g, b] in 0–1 (the export
+// colours parts through one palette texture), or null if it can't be read.
+function textureColor(mesh, cache) {
   const map = mesh.material.map;
   const uv = mesh.geometry?.attributes.uv;
   if (!map || !uv || !map.image) return null;
@@ -52,7 +52,7 @@ function textureLum(mesh, cache) {
   const iy = Math.min(px.h - 1, Math.max(0, Math.floor((map.flipY ? 1 - v : v) * px.h)));
   const o = (iy * px.w + ix) * 4;
   const c = mesh.material.color || { r: 1, g: 1, b: 1 };
-  return (px.d[o] / 255 * c.r + px.d[o + 1] / 255 * c.g + px.d[o + 2] / 255 * c.b) / 3;
+  return [px.d[o] / 255 * c.r, px.d[o + 1] / 255 * c.g, px.d[o + 2] / 255 * c.b];
 }
 
 function disposeTree(root) {
@@ -79,8 +79,10 @@ class RobotStage {
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     r.outputColorSpace = THREE.SRGBColorSpace;
-    r.toneMapping = THREE.ACESFilmicToneMapping;
-    r.toneMappingExposure = 1.05;
+    // Neutral keeps the CAD colours' hues (ACES turned the green bumpers
+    // olive); the lighting is kept soft so the white parts don't blow out.
+    r.toneMapping = THREE.NeutralToneMapping;
+    r.toneMappingExposure = 0.9;
     r.domElement.style.cssText = 'width:100%;height:100%;display:block';
     host.appendChild(r.domElement);
 
@@ -89,10 +91,11 @@ class RobotStage {
     this.envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     pmrem.dispose();
     this.scene.environment = this.envMap;
-    const key = new THREE.DirectionalLight(0xdfe9ff, 1.6);
+    this.scene.environmentIntensity = 0.7;
+    const key = new THREE.DirectionalLight(0xdfe9ff, 1.2);
     key.position.set(3, 5, 4);
     this.scene.add(key);
-    this.scene.add(new THREE.HemisphereLight(0x9bb8ff, 0x0b111b, 0.6));
+    this.scene.add(new THREE.HemisphereLight(0x9bb8ff, 0x0b111b, 0.35));
     this.cam = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
 
     this.ro = new ResizeObserver(() => this.size());
@@ -180,8 +183,19 @@ class RobotStage {
         if (!m.isMesh) return;
         m.material = m.material.clone();
         m.material.transparent = true;
+        const rgb = textureColor(m, texCache);
+        const lum = rgb && (rgb[0] + rgb[1] + rgb[2]) / 3;
+        const sat = rgb && Math.max(...rgb) - Math.min(...rgb);
+        // Onshape's default near-white parts read as aluminum; coloured
+        // parts are toned down a little so they don't glow.
+        if (rgb && lum > 0.6 && sat < 0.1) {
+          m.material.color.set(0xb4bbc4);
+          m.material.metalness = 0.55;
+          m.material.roughness = 0.45;
+        } else if (rgb && sat >= 0.1) {
+          m.material.color.multiplyScalar(0.85);
+        }
         // Dark polycarbonate shows as tinted glass.
-        const lum = textureLum(m, texCache);
         if (lum != null && lum < 0.08) {
           m.material.userData.base = 0.35;
           m.material.metalness = 0.2;
