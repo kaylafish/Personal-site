@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { PROJECTS, getProject, projectModel, projectPath } from '../data/projects.js';
-import { transitionName } from './projectcard.jsx';
 import { MOBILE_QUERY, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
 import ResearchPage from './researchpage.jsx';
@@ -121,8 +120,7 @@ function Datasheet({ slug }) {
   };
 
   return (
-    <div className="glass g-pp">
-      <PageLink to="/projects" className="g-glass-pill g-back-pill">← All projects</PageLink>
+    <div className="glass g-pp" data-pt-page="">
 
       <nav className={`g-pp-toc ${tocOpen ? 'is-open' : ''}`} aria-label="Contents">
         <button type="button" className="g-pp-toc-head" onClick={() => setTocOpen((o) => !o)} aria-expanded={tocOpen}>
@@ -139,7 +137,9 @@ function Datasheet({ slug }) {
       </nav>
 
       <main>
-        <header className={`g-pp-hero ${model ? 'is-3d' : ''}`} style={{ viewTransitionName: transitionName(project.slug) }}>
+        <header className={`g-pp-hero ${model ? 'is-3d' : ''}`}>
+          {/* Where the opening card lands (transitions.js). */}
+          <div className="g-pp-hero-box" data-pt-hero="" aria-hidden="true" />
           {model ? (
             <React.Suspense fallback={null}>
               <ModelViewer key={project.slug} hero {...model} />
@@ -151,12 +151,12 @@ function Datasheet({ slug }) {
             </>
           )}
           <div className="g-pp-title">
-            <div className="g-pp-title-top">
+            <div className="g-pp-title-top" data-build="" style={{ '--b': 0 }}>
               <span>{project.kind}</span>
               <h1>{project.title} <em>{project.titleItalic}</em></h1>
             </div>
             {project.facts.map((f) => (
-              <div key={f.label} className="g-pp-title-cell">
+              <div key={f.label} className="g-pp-title-cell" data-build="" style={{ '--b': 1 }}>
                 <span>{f.label}</span>
                 <span>{f.value}</span>
               </div>
@@ -164,7 +164,7 @@ function Datasheet({ slug }) {
           </div>
         </header>
 
-        <div className="g-pp-body">
+        <div className="g-pp-body" data-build="" style={{ '--b': 2 }}>
           {project.links.length > 0 && (
             <div className="g-pp-links">
               {project.links.map((l) => (

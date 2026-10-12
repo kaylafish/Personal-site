@@ -17,6 +17,8 @@
 //   facts        exactly three label/value pairs for the title block
 //   summary      one or two sentences
 //   links        [{ label, href }] — optional
+//   featured     optional: a short label (e.g. 'Active research'); makes this
+//                the big tile on /projects. One project at a time.
 //   page         optional: 'research' gives the project its own bespoke page
 //                (components/researchpage.jsx) instead of the datasheet below,
 //                which then ignores hero, facts and blocks
@@ -122,6 +124,7 @@ export const PROJECTS = [
   {
     slug: 'canard-roll-reversal',
     page: 'research',
+    featured: 'Active research',
     title: 'Canard', titleItalic: 'roll reversal',
     kind: 'Research · Controls', year: '2026',
     // Swap for a photo of the rocket once there is one (also HERO_PHOTO in data/research.js).

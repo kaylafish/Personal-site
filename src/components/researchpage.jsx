@@ -6,6 +6,7 @@ import {
 import { ProgressBar } from './home.jsx';
 import { clamp, lerp, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
+import { goBackTo } from '../transitions.js';
 import '../research.css';
 
 // /projects/canard-roll-reversal: a scroll-driven story (pinned sections that
@@ -49,18 +50,21 @@ const CHAPTERS = [
   ['rs-arch', 'The system'], ['rs-next', 'What’s next'], ['ds', 'Write-up'],
 ];
 
+// Back to /projects with the reverse of the card-opening transition.
+const toAll = (e) => { e.preventDefault(); goBackTo('/projects'); };
+
 function Nav() {
   return (
     <nav className="g-rs-nav" aria-label="Site">
       <div className="g-rs-nav-left">
         <PageLink to="/" className="g-rs-nav-name">Mikayla Fisher</PageLink>
         <div className="g-rs-crumb">
-          <span>/</span><PageLink to="/#projects">Projects</PageLink><span>/</span><span>Canard roll reversal</span>
+          <span>/</span><a href="/projects" onClick={toAll}>Projects</a><span>/</span><span>Canard roll reversal</span>
         </div>
       </div>
       <div className="g-rs-nav-right">
         <PageLink to="/" className="g-rs-nav-link is-wide">Home</PageLink>
-        <PageLink to="/#projects" className="g-rs-nav-link is-all"><span>←</span>All projects</PageLink>
+        <a href="/projects" onClick={toAll} className="g-rs-nav-link is-all"><span>←</span>All projects</a>
         <a href={RESUME_URL} download={RESUME_FILENAME} className="g-rs-nav-cta is-wide">Résumé ↗</a>
       </div>
     </nav>
@@ -112,13 +116,13 @@ function Hero() {
   return (
     <section id="rs-hero" ref={ref} className="g-rs-pin" style={{ height: '170vh' }}>
       <div className="g-rs-sticky g-rs-hero">
-        <div ref={text} className="g-rs-hero-text">
+        <div ref={text} className="g-rs-hero-text" data-build="" style={{ '--b': 0 }}>
           <span className="g-rs-eyebrow">Research · Active · Simulation</span>
           <h1>{HEADLINE[0]}<br /><em>{HEADLINE[1]}</em></h1>
           <p>Keeping a canard-steered rocket in control when its roll authority peaks, then reverses.</p>
           <span className="g-rs-note">(it fights back)</span>
         </div>
-        <div ref={card} className="g-rs-hero-card">
+        <div ref={card} className="g-rs-hero-card" data-pt-hero="">
           {HERO_PHOTO.src && !HERO_PHOTO.drawing && <img src={HERO_PHOTO.src} alt={HERO_PHOTO.alt} />}
           {HERO_PHOTO.src && HERO_PHOTO.drawing && (
             <div className="g-rs-hero-empty is-drawing"><img src={HERO_PHOTO.src} alt={HERO_PHOTO.alt} /></div>
@@ -487,7 +491,7 @@ function ResearchPage() {
       <div className="g-rs-glow" aria-hidden="true" />
       <Nav />
       <Rail />
-      <main>
+      <main data-pt-page="">
         <Hero />
         <Statement />
         <Curve />

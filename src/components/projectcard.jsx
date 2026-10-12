@@ -2,10 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePageNavigate } from './pagelink.jsx';
 import { projectPath } from '../data/projects.js';
-
-// A project's card and its page hero share this name, so the browser morphs
-// one into the other during the page transition.
-export const transitionName = (slug) => `project-${slug}`;
+import { openProject } from '../transitions.js';
 
 // Opens a project page, first noting how far down the current page is so
 // that Back returns to the same spot (see ScrollManager in App.jsx).
@@ -23,10 +20,10 @@ export function useOpenProject() {
   };
 }
 
-// Cover image, title and year. Used by the "and so much more" field and
-// the /projects grid.
+// Cover image, title and year, as floated in the home page's "and so much
+// more" field. Opening one plays the glass-sheet transition (transitions.js).
 function ProjectCard({ project }) {
-  const open = useOpenProject();
+  const imgRef = React.useRef(null);
   return (
     <a
       href={projectPath(project.slug)}
@@ -34,10 +31,10 @@ function ProjectCard({ project }) {
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let new-tab clicks through
         e.preventDefault();
-        open(project.slug);
+        openProject(project.slug, imgRef.current);
       }}
     >
-      <div className="g-card-img" style={{ viewTransitionName: transitionName(project.slug) }}>
+      <div ref={imgRef} className="g-card-img" data-pt-field={project.slug}>
         <img src={project.cover} alt={project.coverAlt} loading="lazy" />
       </div>
       <div className="g-card-meta">
