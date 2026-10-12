@@ -8,7 +8,9 @@ import { clamp, lerp, easeInOutCubic, go, useScrollFrame, useViewport } from './
 // the glass layers are all driven by scroll position.
 
 const NAME_FS = 76;        // px the name is set at; scaled with transforms
-const NAV_NAME_FS = 20;    // px the name lands at in the navbar
+// px the name lands at in the navbar; smaller on narrow phones so it clears
+// the buttons on the right.
+const navNameFs = (vw) => (vw < 360 ? 16 : vw < 400 ? 18 : 20);
 
 // The refraction is an SVG filter used as a backdrop-filter, which only
 // Chromium supports. Everything else gets a plain blur.
@@ -95,6 +97,17 @@ function GlassBar({ idx, ready, onSlide }) {
   const topRef = React.useRef(null);
   const bottomRef = React.useRef(null);
   const navRef = React.useRef(null);
+  // Phones: the section links live in a menu under the bar.
+  const [menu, setMenu] = React.useState(false);
+  React.useEffect(() => {
+    if (!menu) return undefined;
+    const close = (e) => { if (!e.target.closest?.('.g-nav-menu, .g-nav-sheet')) setMenu(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setMenu(false); };
+    document.addEventListener('pointerdown', close);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', onKey); };
+  }, [menu]);
+  const goMenu = (id) => (e) => { setMenu(false); go(id)(e); };
 
   // Natural width of each word at NAME_FS, re-measured once fonts load.
   const [nameW, setNameW] = React.useState({ m: 340, f: 290 });
@@ -118,7 +131,7 @@ function GlassBar({ idx, ready, onSlide }) {
   // Name scale in the slab: fit the width, and keep the two lines within
   // 30% of the slab's height.
   const s0 = Math.min(1.25, (slab.W - pad * 2) / Math.max(nameW.m, nameW.f, 1), (slab.H * 0.3) / (2 * NAME_FS));
-  const s1 = NAV_NAME_FS / NAME_FS;
+  const s1 = navNameFs(vp.vw) / NAME_FS;
   const heroTop = pad + NAME_FS * s0 * 2 + 26;
 
   useScrollFrame(() => {
@@ -148,6 +161,7 @@ function GlassBar({ idx, ready, onSlide }) {
     s.setProperty('--tint', lerp(1, 0.55, q));
     topRef.current.inert = bottomRef.current.inert = heroOp <= 0.2;
     navRef.current.inert = navOp <= 0.5;
+    if (navOp <= 0.5) setMenu(false);
 
     const ns = lerp(s0, s1, e);
     mRef.current.style.transform =
@@ -234,9 +248,24 @@ function GlassBar({ idx, ready, onSlide }) {
             <a href="#education" onClick={go('education')}>Education</a>
             <a href="#contact" onClick={go('contact')}>Contact</a>
           </div>
+          <button type="button" className="g-nav-menu" aria-label="Sections" aria-expanded={menu}
+            aria-controls="g-nav-sheet" onClick={() => setMenu((m) => !m)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              {menu ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
           <ResumeLink className="g-pill g-nav-resume">Résumé ↗</ResumeLink>
         </nav>
       </header>
+      {menu && (
+        <nav id="g-nav-sheet" className="g-nav-sheet" aria-label="Sections">
+          <a href="#projects" onClick={goMenu('projects')}>Projects</a>
+          <a href="#work" onClick={goMenu('work')}>Work</a>
+          <a href="#education" onClick={goMenu('education')}>Education</a>
+          <a href="#contact" onClick={goMenu('contact')}>Contact</a>
+          <ResumeLink className="g-nav-sheet-resume">Résumé (PDF) ↗</ResumeLink>
+        </nav>
+      )}
     </>
   );
 }

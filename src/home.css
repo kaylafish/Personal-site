@@ -232,6 +232,19 @@ html.glass-home body { overflow-x: clip; }
   margin-left: 6px; padding: 11px 18px;
   background: #fff; color: var(--g-ink); text-shadow: none; font-size: 14px;
 }
+.g-nav-menu { display: none; }
+/* Phones' section menu, dropped under the docked navbar. */
+.g-nav-sheet {
+  position: fixed; z-index: 51; top: 88px; right: 14px; min-width: 200px;
+  display: flex; flex-direction: column; padding: 8px; border-radius: 24px;
+  font-family: var(--g-sans); font-size: 16px; color: #fff;
+  background: rgba(14, 21, 33, .82);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, .45), inset 0 0 0 1px rgba(255, 255, 255, .14), 0 18px 40px rgba(0, 0, 0, .4);
+}
+.g-nav-sheet a { padding: 13px 16px; border-radius: 16px; color: #fff; }
+.g-nav-sheet a:active { background: rgba(255, 255, 255, .1); }
+.g-nav-sheet-resume { margin-top: 4px; border-top: 1px solid rgba(255, 255, 255, .12); border-radius: 0 0 16px 16px !important; }
 
 /* ===============================================
    INTRO
@@ -447,6 +460,13 @@ html.glass-home body { overflow-x: clip; }
   .g-cue { left: 50%; }
   .g-hero-cap { display: none; }
   .g-nav-links { display: none; }
+  .g-nav { right: 10px; gap: 4px; }
+  .g-nav-menu {
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border: 0; border-radius: 50%; padding: 0;
+    background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer;
+  }
+  .g-nav-resume { margin-left: 2px; padding: 10px 14px; font-size: 13px; }
 
   /* No sticky panels: each chapter and row carries its own image / text. */
   .g-story-panel, .g-detail { display: none; }
@@ -468,6 +488,10 @@ html.glass-home body { overflow-x: clip; }
 }
 @media (max-width: 480px) {
   .g-contact-big { font-size: 40px; }
+}
+/* Too narrow for both buttons: Résumé moves into the menu. */
+@media (max-width: 349px) {
+  .g-nav-resume { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -906,6 +930,16 @@ html.pt-arrive .g-nav-links { animation: pt-links-in .45s cubic-bezier(.2, .7, .
   .g-pnav-name { font-size: 17px; }
   .g-pnav.is-all .g-pnav-back, .g-pnav.is-project .g-pnav-back { padding: 10px 12px; }
   .g-pnav-resume { margin-left: 4px; padding: 10px 14px; }
+}
+@media (max-width: 400px) {
+  .g-pnav-name { font-size: 16px; }
+  .g-pnav.is-all .g-pnav-back, .g-pnav.is-project .g-pnav-back { padding: 9px 10px; font-size: 13px; }
+  .g-pnav-resume { margin-left: 2px; padding: 9px 12px; font-size: 13px; }
+}
+@media (max-width: 350px) {
+  .g-pnav { padding-left: 14px; }
+  .g-pnav-name { font-size: 14px; }
+  .g-pnav.is-all .g-pnav-back, .g-pnav.is-project .g-pnav-back { padding: 9px 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

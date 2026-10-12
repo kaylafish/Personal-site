@@ -76,6 +76,16 @@
   background: #fff; color: var(--g-ink); font-weight: 500;
 }
 @media (max-width: 759px) { .g-rs .is-wide { display: none; } }
+/* Narrow phones (Galaxy 360 px, Fold cover 344 px): shrink the name and
+   buttons so they never overlap. */
+@media (max-width: 400px) {
+  .g-rs .g-rs-nav-name { font-size: 18px; }
+  .g-rs .g-rs-nav-link { padding: 9px 11px; font-size: 13px; }
+  .g-rs .g-rs-nav-cta { margin-left: 2px; padding: 10px 13px; font-size: 13px; }
+}
+@media (max-width: 350px) {
+  .g-rs .g-rs-nav-name { font-size: 16px; }
+}
 
 /* ---------- side rail ---------- */
 .g-rs-rail {

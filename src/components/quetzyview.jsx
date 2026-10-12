@@ -16,6 +16,7 @@ import { disposeTree, partKey as key } from './threeutil.js';
 //           frames that subsystem and the others fade back
 //   yaw     camera angle around the robot
 //   shift   moves the robot right by this share of the width
+//   lift    moves it up by this share of the height (phones, above the text)
 // On load the robot starts exploded and assembles itself. onProgress gets
 // the download as 0–1; onLoaded fires once it's on screen.
 //
@@ -68,8 +69,8 @@ class QuetzyStage {
   constructor(host, src, cb) {
     this.host = host;
     this.cb = cb;
-    this.want = { focus: '', yaw: 0.8, shift: 0 };
-    this.cur = { explode: 1, yaw: 0.8, shift: 0, f: FOCI.map((x, i) => (i ? 0 : 1)) };
+    this.want = { focus: '', yaw: 0.8, shift: 0, lift: 0 };
+    this.cur = { explode: 1, yaw: 0.8, shift: 0, lift: 0, f: FOCI.map((x, i) => (i ? 0 : 1)) };
 
     const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     r.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
@@ -262,6 +263,7 @@ class QuetzyStage {
     }
     c.yaw += (v.yaw - c.yaw) * k;
     c.shift += (v.shift - c.shift) * k;
+    c.lift += (v.lift - c.lift) * k;
     c.f = c.f.map((x, i) => {
       const t = FOCI[i] === v.focus ? 1 : 0, y = x + (t - x) * k;
       return Math.abs(y - t) < 0.002 ? t : y;
@@ -301,6 +303,7 @@ class QuetzyStage {
         dist += wt * Math.max(fr.s.y / 2 / th, hz / 2 / (th * asp)) * (i ? 1.9 : 2.7 + c.explode * 0.7);
       });
     }
+    dist *= 1 + c.lift; // lifted above the text, the robot also steps back
     const pitch = 0.32;
     this.cam.position.set(
       Math.sin(c.yaw) * Math.cos(pitch) * dist,
@@ -308,9 +311,9 @@ class QuetzyStage {
       Math.cos(c.yaw) * Math.cos(pitch) * dist,
     ).add(tg);
     this.cam.lookAt(tg);
-    this.cam.setViewOffset(w, h, -c.shift * w, -h * 0.15 * c.f[0], w, h);
+    this.cam.setViewOffset(w, h, -c.shift * w, h * (c.lift - 0.15 * c.f[0]), w, h);
     // Skip the draw when nothing moved.
-    const sig = [c.explode, c.yaw, c.shift, ...c.f, w, h].map((x) => x.toFixed(4)).join() + !!this.parts;
+    const sig = [c.explode, c.yaw, c.shift, c.lift, ...c.f, w, h].map((x) => x.toFixed(4)).join() + !!this.parts;
     if (sig === this.sig) return;
     this.sig = sig;
     this.renderer.render(this.scene, this.cam);
@@ -329,7 +332,7 @@ class QuetzyStage {
   }
 }
 
-function QuetzyView({ src, focus, yaw, shift, onProgress, onLoaded, onError, className }) {
+function QuetzyView({ src, focus, yaw, shift, lift = 0, onProgress, onLoaded, onError, className }) {
   const host = React.useRef(null);
   const stage = React.useRef(null);
   const cb = React.useRef({});
@@ -351,8 +354,8 @@ function QuetzyView({ src, focus, yaw, shift, onProgress, onLoaded, onError, cla
   }, [src]);
 
   React.useEffect(() => {
-    stage.current?.set({ focus, yaw, shift });
-  }, [focus, yaw, shift, src]);
+    stage.current?.set({ focus, yaw, shift, lift });
+  }, [focus, yaw, shift, lift, src]);
 
   return <div ref={host} className={className} aria-hidden="true" />;
 }

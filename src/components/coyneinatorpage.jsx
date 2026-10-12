@@ -452,17 +452,20 @@ function Team() {
   );
 }
 
-// Scrolling down anywhere above the robot's hero glides straight to it,
-// so the tribute hands over to the robot in one move. Wheel, swipe and
+// Once the whole tribute has been on screen, scrolling down glides straight
+// to the robot's hero, so the tribute hands over to the robot in one move.
+// On short screens (small phones, landscape) the tribute scrolls normally
+// until its last line is in view, so nothing is skipped. Wheel, swipe and
 // keys all count; while the glide runs, further input is swallowed so it
 // isn't fought by trackpad momentum. Scrolling up is left alone.
 const GLIDE_MS = 900;
 function glideTo(y) {
-  if (prefersReducedMotion()) { window.scrollTo(0, y); return GLIDE_MS / 4; }
+  // 'instant': styles.css sets smooth scrolling, which would smooth every frame.
+  if (prefersReducedMotion()) { window.scrollTo({ top: y, behavior: 'instant' }); return GLIDE_MS / 4; }
   const y0 = window.scrollY, t0 = performance.now();
   const step = (now) => {
     const t = clamp((now - t0) / GLIDE_MS);
-    window.scrollTo(0, y0 + (y - y0) * easeInOutCubic(t));
+    window.scrollTo({ top: y0 + (y - y0) * easeInOutCubic(t), behavior: 'instant' });
     if (t < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -481,7 +484,11 @@ function useTributeGlide(targetId) {
       return el ? el.getBoundingClientRect().top + window.scrollY : 0;
     };
     const gliding = () => performance.now() < busy.current;
-    const above = () => window.scrollY < target() - 4;
+    const seen = () => {
+      const t = document.getElementById('cy-tribute');
+      return !t || t.getBoundingClientRect().bottom <= window.innerHeight + 4;
+    };
+    const above = () => window.scrollY < target() - 4 && seen();
     const onWheel = (e) => {
       if (gliding()) { e.preventDefault(); return; }
       if (e.deltaY > 0 && Math.abs(e.deltaY) > Math.abs(e.deltaX) && above()) { e.preventDefault(); go(); }

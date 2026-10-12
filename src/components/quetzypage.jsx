@@ -186,6 +186,7 @@ function Tour({ narrow }) {
               focus={hero ? '' : TOUR[ti].focus}
               yaw={0.8 + p * 2.4}
               shift={narrow || hero ? 0 : 0.18}
+              lift={narrow && !hero ? 0.2 : 0}
               onProgress={setLd}
               onLoaded={() => setLoaded(true)}
             />
