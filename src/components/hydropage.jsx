@@ -4,7 +4,7 @@ import {
   CALIBRATION, CHAIN, DROPS, FIXES, PHOTOS, RIG_STEPS, STATS, TRIALS, WHY,
 } from '../data/hydro.js';
 import { ProgressBar } from './home.jsx';
-import { clamp, useGlassTheme, useScrollFrame } from './motion.jsx';
+import { clamp, prefersReducedMotion, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
 import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
@@ -480,6 +480,63 @@ function WriteUp() {
 // 8. Photos of the build (not in the Design handoff; added at the bottom).
 // ---------------------------------------------------------------------------
 
+// The carousel drifts slowly to the left on its own. It stops while the
+// pointer is over it, while it has focus, and for a few seconds after anyone
+// scrolls, swipes or clicks an arrow; at the end it glides back to the start.
+const DRIFT_SPEED = 24; // px per second
+const DRIFT_IDLE = 4000; // ms after an interaction before it moves again
+function useDrift(ref) {
+  const s = React.useRef({ hover: false, focus: false, until: 0, visible: false, x: 0, rewind: 0 });
+  React.useEffect(() => {
+    if (prefersReducedMotion()) return undefined;
+    const el = ref.current;
+    const st = s.current;
+    const io = new IntersectionObserver(([e]) => { st.visible = e.isIntersecting; });
+    io.observe(el);
+    let raf = 0, last = performance.now(), wasOn = false;
+    const tick = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const max = el.scrollWidth - el.clientWidth;
+      const go = st.visible && !document.hidden && !st.hover && !st.focus && now > st.until && max > 0;
+      if (go !== wasOn) { wasOn = go; st.x = el.scrollLeft; }
+      // Scrolled some other way (a scrollbar, a trackpad): pick up from there.
+      if (go && !st.rewind && Math.abs(el.scrollLeft - st.x) > 2) { st.x = el.scrollLeft; }
+      if (go) {
+        if (st.x >= max - 1) {
+          // At the end: pause, then glide back to the first photo.
+          if (!st.rewind) st.rewind = now + 1500;
+          else if (now > st.rewind) {
+            st.rewind = 0;
+            st.until = now + 2000;
+            st.x = 0;
+            el.scrollTo({ left: 0, behavior: 'smooth' });
+          }
+        } else {
+          st.x = Math.min(max, st.x + DRIFT_SPEED * dt);
+          el.scrollLeft = st.x;
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); io.disconnect(); };
+  }, [ref]);
+  const hold = () => { s.current.until = performance.now() + DRIFT_IDLE; s.current.rewind = 0; };
+  return {
+    hold,
+    handlers: {
+      onPointerEnter: (e) => { if (e.pointerType === 'mouse') s.current.hover = true; },
+      onPointerLeave: () => { s.current.hover = false; hold(); },
+      onPointerDown: hold,
+      onTouchStart: hold,
+      onWheel: hold,
+      onFocus: () => { s.current.focus = true; },
+      onBlur: () => { s.current.focus = false; hold(); },
+    },
+  };
+}
+
 function Photos() {
   const row = React.useRef(null);
   const [ends, setEnds] = React.useState([true, false]);
@@ -492,8 +549,10 @@ function Photos() {
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, []);
+  const drift = useDrift(row);
   const step = (dir) => () => {
     const el = row.current;
+    drift.hold();
     el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
   };
   return (
@@ -508,7 +567,14 @@ function Photos() {
           <button type="button" onClick={step(1)} disabled={ends[1]} aria-label="Next photos">→</button>
         </div>
       </div>
-      <div ref={row} className="g-hy-carousel" onScroll={measure} tabIndex={0} aria-label="Build photos">
+      <div
+        ref={row}
+        className="g-hy-carousel"
+        onScroll={measure}
+        tabIndex={0}
+        aria-label="Build photos"
+        {...drift.handlers}
+      >
         {PHOTOS.map((p) => (
           <figure key={p.src} style={{ '--ar': p.w / p.h }}>
             <a href={p.src} target="_blank" rel="noreferrer">

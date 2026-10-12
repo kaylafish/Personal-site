@@ -253,6 +253,9 @@
   padding: 0 var(--hy-edge) 8px; scrollbar-width: none;
 }
 .g-hy-carousel::-webkit-scrollbar { display: none; }
+/* No snapping while the carousel drifts on its own (it would jump when the
+   drift stops); it snaps only when motion is reduced and nothing drifts. */
+@media (prefers-reduced-motion: no-preference) { .g-hy-carousel { scroll-snap-type: none; } }
 .g-hy-carousel figure {
   flex: none; margin: 0; width: calc(var(--hy-h) * var(--ar)); max-width: 82vw;
   display: flex; flex-direction: column; gap: 10px; scroll-snap-align: start;
