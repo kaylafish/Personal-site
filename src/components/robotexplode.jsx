@@ -301,7 +301,13 @@ function RobotExplode({ src, subsystems, explode, focus, spin, shift, lift, clas
   const host = React.useRef(null);
   const stage = React.useRef(null);
   React.useEffect(() => {
-    const s = new RobotStage(host.current, { src, subsystems });
+    let s;
+    // No WebGL (blocked, or an old device): the page still works without
+    // the model.
+    try { s = new RobotStage(host.current, { src, subsystems }); } catch (err) {
+      console.warn('REBUILT model unavailable', err);
+      return undefined;
+    }
     stage.current = s;
     return () => { s.dispose(); stage.current = null; };
   }, [src, subsystems]);

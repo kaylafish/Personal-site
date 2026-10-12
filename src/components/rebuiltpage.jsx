@@ -19,6 +19,14 @@ import '../rebuilt.css';
 const RobotExplode = React.lazy(() => import('./robotexplode.jsx'));
 const MODEL = '/models/rebuilt.glb';
 
+// If the viewer's code can't load (offline, a stale deploy), the page goes
+// on without the model.
+class SkipOnError extends React.Component {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
 const smooth = (t) => { t = clamp(t); return t * t * (3 - 2 * t); };
 const NARROW = '(max-width: 759px)';
 function useNarrow() {
@@ -142,18 +150,20 @@ function CadTour({ narrow }) {
   return (
     <section id="rb-cad" ref={ref} className="g-rs-pin" style={{ height: `${(2 + N) * 100 + 60}vh` }}>
       <div className="g-rs-sticky g-rb-cad">
-        <React.Suspense fallback={null}>
-          <RobotExplode
-            className="g-rb-robot"
-            src={MODEL}
-            subsystems={SUBSYSTEMS}
-            explode={stage === EXPLODED ? 1 : 0}
-            focus={touring ? sub.node : ''}
-            spin={touring ? 0.18 : 0.1}
-            shift={!narrow && touring ? 0.14 : 0}
-            lift={narrow && touring ? 0.2 : 0}
-          />
-        </React.Suspense>
+        <SkipOnError>
+          <React.Suspense fallback={null}>
+            <RobotExplode
+              className="g-rb-robot"
+              src={MODEL}
+              subsystems={SUBSYSTEMS}
+              explode={stage === EXPLODED ? 1 : 0}
+              focus={touring ? sub.node : ''}
+              spin={touring ? 0.18 : 0.1}
+              shift={!narrow && touring ? 0.14 : 0}
+              lift={narrow && touring ? 0.2 : 0}
+            />
+          </React.Suspense>
+        </SkipOnError>
         <div className="g-rb-cad-fade" />
 
         {/* Behind the transparent canvas, so the robot stands in front of it. */}
