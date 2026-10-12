@@ -89,13 +89,30 @@ function PhotoTag({ tag, boxRef, show = true }) {
   );
 }
 
+// The person icon in the photo's corner, like Instagram's, that shows the tags.
+function TagToggle({ on, onClick }) {
+  return (
+    <button type="button" className={`g-tag-toggle ${on ? 'is-on' : ''}`} onClick={onClick}
+      aria-pressed={on} aria-label={on ? 'Hide tags' : 'Show tags'}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <circle cx="12" cy="7.5" r="4.5" />
+        <path d="M3 21c0-4.4 4-7.5 9-7.5s9 3.1 9 7.5z" />
+      </svg>
+    </button>
+  );
+}
+
 function ChapterPhoto({ project }) {
   const imgRef = React.useRef(null);
+  const [tagsOn, setTagsOn] = React.useState(false);
   return (
     <div className="g-chapter-photo">
       <img ref={imgRef} src={project.cover} alt={project.coverAlt} loading="lazy"
         className={`g-chapter-img ${project.coverFit === 'contain' ? 'is-drawing' : ''}`} />
-      {project.coverTag && <PhotoTag tag={project.coverTag} boxRef={imgRef} />}
+      {project.coverTag && <>
+        <PhotoTag tag={project.coverTag} boxRef={imgRef} show={tagsOn} />
+        <TagToggle on={tagsOn} onClick={() => setTagsOn((v) => !v)} />
+      </>}
     </div>
   );
 }
@@ -105,6 +122,7 @@ function Projects() {
   const panelRef = React.useRef(null);
   const [active, setActive] = React.useState(0);
   const [view3d, setView3d] = React.useState(false);
+  const [tagsOn, setTagsOn] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
   const openProject = useOpenProject();
   const chapters = CHAPTERS.map((c) => ({ ...c, project: getProject(c.slug) }));
@@ -152,8 +170,11 @@ function Projects() {
           ))}
           {!show3d && chapters.filter((c) => c.project.coverTag).map((c) => (
             <PhotoTag key={c.slug} tag={c.project.coverTag} boxRef={panelRef}
-              show={chapters[active].slug === c.slug} />
+              show={tagsOn && chapters[active].slug === c.slug} />
           ))}
+          {!show3d && chapters[active].project.coverTag && (
+            <TagToggle on={tagsOn} onClick={() => setTagsOn((v) => !v)} />
+          )}
           {show3d && (
             // If the viewer's code fails to download, go back to the photo.
             <SkipOnError key={chapters[active].slug} onError={() => setView3d(false)}>
