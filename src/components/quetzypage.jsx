@@ -4,7 +4,7 @@ import {
   AUTO_FIG, CONE, CUBE, INTAKE_FACTS, LAYERS, LIMITS, PHOTOS, PRESETS, RESULTS, STAGGER, STATES, STATS, TABLE, TOUR,
 } from '../data/quetzy.js';
 import { ProgressBar } from './home.jsx';
-import { clamp, useGlassTheme, useScrollFrame } from './motion.jsx';
+import { Rv, clamp, prefersReducedMotion, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
 import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
@@ -106,16 +106,48 @@ function Rail() {
 
 const pad2 = (n) => String(n).padStart(2, '0');
 
+// A stat that counts up from zero the first time it scrolls into view.
+// Whatever surrounds the number ("~", "rd", " A", "%") stays put.
+function CountUp({ value, className, style }) {
+  const ref = React.useRef(null);
+  // Ranks ("3rd") stay as they are: "0rd" on the way up reads wrong.
+  const m = /^(\D*)([\d,]+)(?![\d,]|st|nd|rd|th)(.*)$/.exec(value);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!m || !el || prefersReducedMotion() || !('IntersectionObserver' in window)) return undefined;
+    const [, pre, num, post] = m;
+    const target = Number(num.replace(/,/g, ''));
+    const show = (n) => { el.textContent = pre + Math.round(n).toLocaleString('en-US') + post; };
+    let raf = 0;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      const t0 = performance.now(), dur = 1400;
+      const step = (now) => {
+        const t = clamp((now - t0) / dur);
+        show(target * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }, { threshold: 0.3 });
+    // Below the fold, start from zero so the count is seen.
+    if (el.getBoundingClientRect().top > window.innerHeight * 0.9) show(0);
+    io.observe(el);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
+  }, [value]);
+  return <span ref={ref} className={className} style={style}>{value}</span>;
+}
+
 // Section heading: eyebrow and display title, with an optional paragraph
 // beside it.
 function Head({ eyebrow, title, em, children }) {
   return (
     <div className="g-qz-split">
-      <div className="g-qz-head">
+      <Rv className="g-qz-head">
         <span className="g-rs-eyebrow">{eyebrow}</span>
         <h2 className="g-qz-display">{title} <em>{em}</em></h2>
-      </div>
-      {children}
+      </Rv>
+      {children && <Rv delay={120}>{children}</Rv>}
     </div>
   );
 }
@@ -212,13 +244,13 @@ function Glance() {
           <p className="g-qz-lede">Quetzy is a swerve robot with a two-joint arm that scores cones and cubes on all three rows. I wrote its software: about 2,750 lines of Java. One driver runs the robot from one Xbox controller, every arm pose is one button, and the LEDs show the robot’s mode.</p>
         </Head>
         <div className="g-qz-cards is-results">
-          {RESULTS.map((s) => (
-            <div key={s.k}><span className="g-rs-eyebrow">{s.k}</span><span className="g-qz-big">{s.v}</span><span>{s.d}</span></div>
+          {RESULTS.map((s, i) => (
+            <Rv key={s.k} delay={i * 90}><span className="g-rs-eyebrow">{s.k}</span><CountUp className="g-qz-big" value={s.v} /><span>{s.d}</span></Rv>
           ))}
         </div>
         <div className="g-qz-cards">
-          {STATS.map((s) => (
-            <div key={s.k}><span className="g-rs-eyebrow">{s.k}</span><span className="g-qz-big is-stat">{s.v}</span><span>{s.d}</span></div>
+          {STATS.map((s, i) => (
+            <Rv key={s.k} delay={i * 90}><span className="g-rs-eyebrow">{s.k}</span><CountUp className="g-qz-big is-stat" value={s.v} /><span>{s.d}</span></Rv>
           ))}
         </div>
       </div>
@@ -345,7 +377,7 @@ function Arm() {
         <Head eyebrow="Interactive · press a preset" title="Arm and wrist" em="presets">
           <p className="g-qz-body">Every preset is an (arm, wrist) angle pair, and cone or cube mode picks which table a button reads from. Each joint follows its own trapezoid profile, feedforward supplies the voltage, and a P controller cleans up. Going up, the arm leads and the wrist follows 0.4 s later. Coming down, the wrist tucks first.</p>
         </Head>
-        <div className="g-qz-play">
+        <Rv className="g-qz-play">
           <div className="g-qz-controls">
             <div className="g-qz-presets">
               {PRESETS.map(([k, l]) => (
@@ -449,7 +481,7 @@ function Arm() {
               <p className="g-qz-small">Setpoints computed from the limits and presets in the code, not logged sensor data. Changing mode applies on the next press, like on the robot. Wrist angle is absolute. Link lengths are schematic.</p>
             </div>
           </div>
-        </div>
+        </Rv>
       </div>
     </section>
   );
@@ -463,14 +495,14 @@ function Intake() {
   return (
     <section id="qz-intake" className="g-qz-band">
       <div className="g-qz-wrap is-narrow g-qz-intake">
-        <div className="g-qz-head">
+        <Rv className="g-qz-head">
           <span className="g-rs-eyebrow">Intake</span>
           <h2 className="g-qz-display">Game piece <em>detection</em></h2>
           <p className="g-qz-body">One roller spins one way for cubes and the other for cones. There is no beam break: the code watches the roller motor’s stator current, and past 50 A it rumbles the driver’s controller. After the button is released, the roller keeps a 7% hold in the right direction for that piece.</p>
-        </div>
+        </Rv>
         <div className="g-qz-cards is-intake">
-          {INTAKE_FACTS.map((f) => (
-            <div key={f.k}><span className="g-rs-eyebrow">{f.k}</span><span className="g-qz-big is-stat" style={f.c ? { color: f.c } : undefined}>{f.v}</span><span>{f.d}</span></div>
+          {INTAKE_FACTS.map((f, i) => (
+            <Rv key={f.k} delay={i * 90}><span className="g-rs-eyebrow">{f.k}</span><CountUp className="g-qz-big is-stat" style={f.c ? { color: f.c } : undefined} value={f.v} /><span>{f.d}</span></Rv>
           ))}
         </div>
       </div>
@@ -500,7 +532,7 @@ function State() {
           <p className="g-qz-body">Every subsystem shares one state value, and every state carries its own LED pattern. Changing state is one call: it sets both LED strips and appends the state to the on-robot log. Presets resolve against the current state, so the same button gives a cone or cube pose.</p>
         </Head>
         <div className="g-qz-state">
-          <div className="g-qz-states">
+          <Rv className="g-qz-states">
             {STATES.map((s) => (
               <button key={s.id} type="button" onClick={() => setSt(s.id)} className={s.id === st ? 'is-on' : ''} aria-pressed={s.id === st}>
                 <span className="g-qz-swatch" style={{ background: s.led }} />
@@ -508,8 +540,8 @@ function State() {
               </button>
             ))}
             <span className="g-qz-small">Declared but never entered on main: HAS_OBJECT, CAN_BUS_ERROR, PROGRAMMERS_R_DUMB.</span>
-          </div>
-          <div className="g-qz-state-card" aria-live="polite">
+          </Rv>
+          <Rv className="g-qz-state-card" delay={120} aria-live="polite">
             <div className="g-qz-strips">
               <div key={`a${cur.id}`} className={cur.anim && `is-${cur.anim}`} style={strip} />
               <div key={`b${cur.id}`} className={cur.anim && `is-${cur.anim}`} style={strip} />
@@ -524,10 +556,10 @@ function State() {
                 </button>
               ))}
             </div>
-          </div>
+          </Rv>
         </div>
         <div className="g-qz-notes">
-          {LAYERS.map((l) => <div key={l.t}><h3 className="g-qz-hand is-title">{l.t}</h3><p>{l.b}</p></div>)}
+          {LAYERS.map((l, i) => <Rv key={l.t} delay={i * 90}><h3 className="g-qz-hand is-title">{l.t}</h3><p>{l.b}</p></Rv>)}
         </div>
       </div>
     </section>
@@ -545,15 +577,15 @@ function Auto() {
         <Head eyebrow="Autonomous" title="Autonomous" em="routines">
           <p className="g-qz-body">The routines reuse the teleop commands (high node, stow, run intake) and chain them alongside PathPlanner trajectories, mirrored for the red alliance. The three-piece routine scores the preloaded cone high, then drives 25.9 m of path to collect and score two cubes.</p>
         </Head>
-        <figure className="g-qz-fig">
+        <Rv as="figure" className="g-qz-fig">
           <a href={AUTO_FIG.src} target="_blank" rel="noreferrer">
             <img src={AUTO_FIG.src} alt={AUTO_FIG.alt} width={AUTO_FIG.w} height={AUTO_FIG.h} loading="lazy" decoding="async" />
           </a>
           <figcaption>Drawn from the PathPlanner files the robot follows. Field landmarks are approximate. A fourth routine, 2P, is 2PE without the charge station run.</figcaption>
-        </figure>
+        </Rv>
         <div className="g-qz-notes is-two">
-          <div><h3 className="g-qz-hand is-title">Auto-balance</h3><p>On the charge station, two PD loops read pitch and roll from the gyro and drive the robot uphill until both are within 2.5°. The LEDs turn white when it is level.</p></div>
-          <div><h3 className="g-qz-hand is-title">Starting mode</h3><p>Three of the four routines start in IDLE, which reads the cone table, score the preloaded cone, and only then switch to CUBE for the pieces they pick up off the floor.</p></div>
+          <Rv><h3 className="g-qz-hand is-title">Auto-balance</h3><p>On the charge station, two PD loops read pitch and roll from the gyro and drive the robot uphill until both are within 2.5°. The LEDs turn white when it is level.</p></Rv>
+          <Rv delay={90}><h3 className="g-qz-hand is-title">Starting mode</h3><p>Three of the four routines start in IDLE, which reads the cone table, score the preloaded cone, and only then switch to CUBE for the pieces they pick up off the floor.</p></Rv>
         </div>
       </div>
     </section>
@@ -564,14 +596,14 @@ function Safe() {
   return (
     <section id="qz-safe" className="g-qz-sec">
       <div className="g-qz-wrap is-narrow is-last">
-        <div className="g-qz-head is-measure">
+        <Rv className="g-qz-head is-measure">
           <span className="g-rs-eyebrow">When things go wrong</span>
           <h2 className="g-qz-display">Fault <em>handling</em></h2>
           <p className="g-qz-body">If the arm or wrist absolute encoder comes unplugged, that joint’s position control switches off, its motors stop, new moves are refused and the LEDs strobe red. A second check catches the encoder wrapping past a full turn and corrects for it. State changes, encoder health and the wrap correction all go to the on-robot data log.</p>
-        </div>
+        </Rv>
         <div className="g-qz-notes is-two">
-          <div><h3 className="g-qz-hand is-title">What I would change</h3><p>RobotState is a shared flag, not a strict transition table, and mode shares one variable with status. I would split the two so a fault cannot overwrite cone or cube, drive the declared HAS_OBJECT state from the current spike that already exists, and finish the Limelight alignment left on the Vision branch.</p></div>
-          <div><h3 className="g-qz-hand is-title">Credits</h3><p>The swerve drive is built on Team 364’s open-source BaseFalconSwerve template, and trajectories use PathPlanner. The arm, wrist, intake, state machine, autonomous routines and auto-balance were written for Quetzy.</p></div>
+          <Rv><h3 className="g-qz-hand is-title">What I would change</h3><p>RobotState is a shared flag, not a strict transition table, and mode shares one variable with status. I would split the two so a fault cannot overwrite cone or cube, drive the declared HAS_OBJECT state from the current spike that already exists, and finish the Limelight alignment left on the Vision branch.</p></Rv>
+          <Rv delay={90}><h3 className="g-qz-hand is-title">Credits</h3><p>The swerve drive is built on Team 364’s open-source BaseFalconSwerve template, and trajectories use PathPlanner. The arm, wrist, intake, state machine, autonomous routines and auto-balance were written for Quetzy.</p></Rv>
         </div>
         <span className="g-qz-source">From frc4255/2023_Quetzy · main · last commit 28 Oct 2023</span>
       </div>
@@ -583,18 +615,18 @@ function Photos() {
   return (
     <section id="qz-photos" className="g-qz-band is-end">
       <div className="g-qz-wrap is-photos">
-        <div className="g-qz-head">
+        <Rv className="g-qz-head">
           <span className="g-rs-eyebrow">2023 season</span>
           <h2 className="g-qz-display">Quetzy <em>in person</em></h2>
-        </div>
+        </Rv>
         <div className="g-qz-masonry">
-          {PHOTOS.map((ph) => (
-            <figure key={ph.src}>
+          {PHOTOS.map((ph, i) => (
+            <Rv as="figure" key={ph.src} delay={(i % 3) * 90}>
               <a href={ph.src} target="_blank" rel="noreferrer">
                 <img src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} loading="lazy" decoding="async" />
               </a>
               <figcaption>{ph.cap}</figcaption>
-            </figure>
+            </Rv>
           ))}
         </div>
       </div>
