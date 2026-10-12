@@ -224,7 +224,7 @@ function Tour({ narrow }) {
 
         <div className={`g-cy-hero ${si === 0 ? '' : 'is-off'}`}>
           <span className="g-rs-eyebrow">FRC Team 4255 · 2025 Reefscape robot</span>
-          <h1 data-pt-title="">The <em>Coyneinator.</em></h1>
+          <h1 data-pt-title=""><em>Coyneinator.</em></h1>
           <p>A swerve robot with a pivoting elevator, a coaxial differential wrist and a five-joint arm that only ever moves along safe paths.</p>
           <span className="g-cy-hero-note">1.4 ft tall folded, 7 ft fully up</span>
         </div>

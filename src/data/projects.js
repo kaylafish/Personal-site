@@ -103,7 +103,7 @@ export const PROJECTS = [
   {
     slug: 'frc-coyneinator',
     page: 'coyneinator',
-    title: 'The', titleItalic: 'Coyneinator',
+    title: 'FRC', titleItalic: 'Coyneinator',
     kind: 'Mechanical · 2025', year: '2025',
     cover: '/assets/coyneinator/team-sf-regional.webp',
     coverAlt: 'FRC Team 4255 with the 2025 San Francisco Regional winner banner',
