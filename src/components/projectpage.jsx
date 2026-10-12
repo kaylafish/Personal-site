@@ -8,6 +8,7 @@ import HydroPage from './hydropage.jsx';
 import MagnusPage from './magnuspage.jsx';
 import RebuiltPage from './rebuiltpage.jsx';
 import ResearchPage from './researchpage.jsx';
+import QuetzyPage from './quetzypage.jsx';
 import { loadModelViewer, whenSettled } from '../transitions.js';
 
 // /projects/<slug>: the "datasheet" page. One template for every project,
@@ -81,6 +82,8 @@ function Block({ block, num }) {
 const CUSTOM_PAGES = {
   research: ResearchPage, rebuilt: RebuiltPage, magnus: MagnusPage, hydro: HydroPage, coyneinator: CoyneinatorPage,
 };
+
+CUSTOM_PAGES.quetzy = QuetzyPage;
 
 function ProjectPage() {
   const { slug } = useParams();
