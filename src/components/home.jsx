@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import Hero, { SLIDES, SLIDE_MS } from './hero.jsx';
 import GlassBar from './glassbar.jsx';
 import Intro from './intro.jsx';
@@ -10,7 +11,7 @@ import Contact from './contact.jsx';
 import { useGlassTheme, useScrollFrame } from './motion.jsx';
 
 // Thin bar along the bottom edge showing how far down the page you are.
-function ProgressBar() {
+export function ProgressBar() {
   const ref = React.useRef(null);
   useScrollFrame(() => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -38,6 +39,19 @@ function Home() {
   }, [startTimer]);
 
   useGlassTheme();
+
+  // Links like /#projects open the home page at that section. Wait for the
+  // fonts, since they change how tall everything above it is.
+  const { hash } = useLocation();
+  React.useEffect(() => {
+    if (!hash) return undefined;
+    let live = true;
+    document.fonts.ready.then(() => {
+      const el = live && document.getElementById(decodeURIComponent(hash.slice(1)));
+      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'instant' });
+    });
+    return () => { live = false; };
+  }, [hash]);
 
   return (
     <div className="glass">
