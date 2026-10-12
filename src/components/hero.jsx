@@ -1,94 +1,76 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Reveal, RevealWords } from './reveal.jsx';
-import Sprite from './sprites.jsx';
+import { clamp, go, useScrollFrame } from './motion.jsx';
 
-function Hero() {
-  const navigate = useNavigate();
-  const [time, setTime] = React.useState('');
-  React.useEffect(() => {
-    const tick = () => {
-      const d = new Date();
-      const opts = { hour: '2-digit', minute: '2-digit', timeZone: 'America/New_York' };
-      setTime(d.toLocaleTimeString('en-US', opts));
-    };
-    tick();
-    const id = setInterval(tick, 30000);
-    return () => clearInterval(id);
-  }, []);
+// ============================================================================
+// HERO SLIDESHOW — EDIT THIS LIST TO CHANGE THE PHOTOS BEHIND THE GLASS
+// ----------------------------------------------------------------------------
+// label / cap show in the slab's slide row and the bottom-right caption.
+// pos is an optional object-position for crops that need it.
+// ============================================================================
+const SLIDES = [
+  { src: '/assets/quetzy.webp',   alt: 'FRC 2023 robot at the MHS Open House',      label: 'FRC 2023 Charged Up!',   cap: 'MHS Open House' },
+  { src: '/assets/project.webp',  alt: 'Model rocket R01 at the Rocketry Club fair', label: 'Model rocket R01',       cap: 'Rocketry Club fair' },
+  { src: '/assets/rebuilt.webp',  alt: 'FRC 2026 REBUILT robot during testing',      label: 'FRC 2026 REBUILT robot', cap: 'Robot undergoing testing' },
+  { src: '/assets/campus.webp',   alt: 'WPI campus',                                 label: 'WPI, class of 2030',     cap: 'Worcester, MA' },
+  { src: '/assets/portrait.webp', alt: 'Mikayla Fisher',                             label: "That's me",              cap: 'Mikayla Fisher', pos: '50% 30%' },
+];
+const SLIDE_MS = 5500;
+
+function Hero({ idx, ready }) {
+  const secRef = React.useRef(null);
+  const photosRef = React.useRef(null);
+  const dimRef = React.useRef(null);
+
+  // Only fetch a photo once it's the current or the next slide.
+  const [seen, setSeen] = React.useState(0);
+  React.useEffect(() => { setSeen((s) => Math.max(s, idx)); }, [idx]);
+
+  useScrollFrame(() => {
+    const y = window.scrollY;
+    const vh = window.innerHeight;
+    const sy = Math.min(y, vh * 1.2);
+    photosRef.current.style.transform = `translate3d(0,${sy * 0.35}px,0)`;
+    dimRef.current.style.opacity = clamp(sy / vh) * 0.6;
+    // Matches the slab content's fade (see glassbar.jsx).
+    secRef.current.style.setProperty('--hero-op', clamp(1 - clamp(y / (vh * 0.6)) * 2.6));
+  });
 
   return (
-    <header className="hero" id="top">
-      <div className="hero-sprites" aria-hidden="true">
-        <Sprite kind="orbit" className="s1 spin" />
-        <Sprite kind="asterisk" className="s2 twinkle" />
-        <Sprite kind="squiggle" className="s3" />
-        <Sprite kind="satellite" className="s4 drift" />
-      </div>
-
-      <div className="hero-kicker mono">
-        <div className="loc">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 22s8-7.5 8-13a8 8 0 1 0-16 0c0 5.5 8 13 8 13z"/>
-            <circle cx="12" cy="9" r="3"/>
-          </svg>
-          Worcester, MA · {time || '—'} EST
-        </div>
-        <div>Portfolio · 2026 / 01</div>
-      </div>
-
-      <div className="hero-marquee">
-        N 42°16′N<br/>
-        W 71°48′W<br/>
-        EL. 480 FT
-      </div>
-
-      <h1 className="hero-title">
-        <Reveal><span className="line">Mikayla</span></Reveal>
-        <Reveal delay={150}><span className="line">Fisher,</span></Reveal>
-        <Reveal delay={300}><span className="line flourish">aerospace</span></Reveal>
-        <Reveal delay={450}><span className="line">engineer.</span></Reveal>
-      </h1>
-
-      <div className="hero-portrait">
-        <Reveal delay={200}>
-          <figure>
-            <img src="/assets/portrait.webp" alt="Mikayla Fisher" />
-          </figure>
-        </Reveal>
-      </div>
-
-      <div className="hero-sub">
-        <p className="hero-bio">
-          <RevealWords text="Pursuing a B.S. in Aerospace Engineering at Worcester Polytechnic Institute, class of 2030. Focused on the trajectory toward graduate study in" />
-          {' '}<em>Guidance, Navigation &amp; Control</em>.
-        </p>
-
-        <div className="hero-meta">
-          <div className="label">Currently</div>
-          <div className="val">Senior @ Monterey High School - Incoming @ WPI ’30</div>
-          <div className="label" style={{ marginTop: 10 }}>Interests</div>
-          <div className="val">GNC · Orbital Mechanics · Autonomy</div>
-        </div>
-
-        <div className="hero-meta">
-          <div className="label">Field Hockey</div>
-          <div className="val">Forward ·{' '}
-            <a href="/fieldhockey" onClick={(e) => { e.preventDefault(); navigate('/fieldhockey'); }}
-               style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>
-              see highlights →
-            </a>
+    <section id="top" ref={secRef} className={`g-hero ${ready ? 'is-ready' : ''}`}>
+      <div ref={photosRef} className="g-hero-photos">
+        {SLIDES.map((s, i) => (
+          <div key={s.src} className={`g-slide ${i === idx ? 'is-on' : ''}`}>
+            {(i <= seen + 1 || i === idx) && (
+              <img
+                src={s.src}
+                alt={s.alt}
+                style={s.pos ? { objectPosition: s.pos } : undefined}
+                fetchpriority={i === 0 ? 'high' : undefined}
+              />
+            )}
           </div>
-        </div>
+        ))}
       </div>
+      <div ref={dimRef} className="g-hero-dim" />
+      <div className="g-hero-fade" />
 
-      <div className="hero-ticker">
-        <span>◉ TRACKING · AZ 127.4° · EL 18.2°</span>
-        <span>SYS NOMINAL <span className="dot"></span> T+0 · 00:00:00</span>
-        <span>SCROLL TO ENTER<span className="scroll-arrow"><Sprite kind="arrow"/></span></span>
+      <button type="button" className="g-cue" onClick={go('intro')} aria-label="Scroll down">
+        <span>Scroll</span>
+        <span className="g-cue-ring">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
+      </button>
+
+      <div className="g-hero-cap">
+        <div>{SLIDES[idx].label}</div>
+        <div className="g-hero-cap-sub">{SLIDES[idx].cap}</div>
       </div>
-    </header>
+    </section>
   );
 }
 
 export default Hero;
+export { SLIDES, SLIDE_MS };

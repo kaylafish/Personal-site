@@ -1,25 +1,14 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
 import Nav from './components/nav.jsx';
-import Hero from './components/hero.jsx';
-import Experience from './components/experience.jsx';
-import Projects from './components/projects.jsx';
-import Education from './components/education.jsx';
-import Skills from './components/skills.jsx';
-import Contact from './components/contact.jsx';
+import Home from './components/home.jsx';
 import FieldHockey from './components/fieldhockey.jsx';
 import AllProjects from './components/allprojects.jsx';
+import ProjectPage from './components/projectpage.jsx';
 import AllHighlights from './components/allhighlights.jsx';
 import Scrollspy from './components/scrollspy.jsx';
+import { usePageNavigate } from './components/pagelink.jsx';
 
-const HOME_SECTIONS = [
-  { id: 'top',        label: 'Top' },
-  { id: 'experience', label: 'Work' },
-  { id: 'projects',   label: 'Projects' },
-  { id: 'education',  label: 'Education' },
-  { id: 'skills',     label: 'Skills' },
-  { id: 'contact',    label: 'Contact' },
-];
 const FH_SECTIONS = [
   { id: 'fh-top',         label: 'Top' },
   { id: 'fh-films',       label: 'Film' },
@@ -27,38 +16,22 @@ const FH_SECTIONS = [
   { id: 'fh-recruiting',  label: 'Recruiting' },
 ];
 
-function ScrollToTopOnRouteChange() {
-  const { pathname } = useLocation();
-  React.useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, [pathname]);
+// New pages open at the top. Going Back to a page that noted its scroll
+// position before leaving (see useOpenProject) returns to that spot.
+function ScrollManager() {
+  const location = useLocation();
+  const navType = useNavigationType();
+  React.useLayoutEffect(() => {
+    const saved = navType === 'POP' ? location.state?.scrollY : null;
+    // 'instant', not 'auto': styles.css sets scroll-behavior: smooth, and a
+    // page shouldn't open mid-scroll from wherever the last one was.
+    window.scrollTo({ top: saved ?? 0, behavior: 'instant' });
+  }, [location.pathname]);
   return null;
 }
 
-function HomePage({ cardStyle }) {
-  const navigate = useNavigate();
-  return (
-    <>
-      <div className="page">
-        <Hero />
-        <Experience />
-        <Projects cardStyle={cardStyle} onViewAll={() => navigate('/projects')} />
-        <Education />
-        <Skills />
-        <Contact />
-      </div>
-      <Scrollspy sections={HOME_SECTIONS} />
-    </>
-  );
-}
-
-function ProjectsPage() {
-  const navigate = useNavigate();
-  return <AllProjects onBack={() => navigate('/')} />;
-}
-
 function FieldHockeyPage() {
-  const navigate = useNavigate();
+  const navigate = usePageNavigate();
   return (
     <>
       <FieldHockey onViewAll={() => navigate('/highlights')} />
@@ -72,12 +45,15 @@ function FieldHockeyPage() {
 }
 
 function HighlightsPage() {
-  const navigate = useNavigate();
+  const navigate = usePageNavigate();
   return <AllHighlights onBack={() => navigate('/fieldhockey')} />;
 }
 
+const LEGACY_ROUTES = ['/fieldhockey', '/highlights'];
+
 function Shell() {
   const site = window.SITE || {};
+  const { pathname } = useLocation();
   const [theme, setTheme] = React.useState(() => {
     try {
       const saved = localStorage.getItem('mf_theme');
@@ -112,14 +88,16 @@ function Shell() {
 
   return (
     <>
-      <ScrollToTopOnRouteChange />
-      <Nav theme={theme} setTheme={setTheme} />
+      <ScrollManager />
+      {/* The glass pages (home, projects) bring their own navigation. */}
+      {LEGACY_ROUTES.includes(pathname.replace(/\/+$/, '')) && <Nav theme={theme} setTheme={setTheme} />}
       <Routes>
-        <Route path="/" element={<HomePage cardStyle={site.cardStyle} />} />
-        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/projects" element={<AllProjects />} />
+        <Route path="/projects/:slug" element={<ProjectPage />} />
         <Route path="/fieldhockey" element={<FieldHockeyPage />} />
         <Route path="/highlights" element={<HighlightsPage />} />
-        <Route path="*" element={<HomePage cardStyle={site.cardStyle} />} />
+        <Route path="*" element={<Home />} />
       </Routes>
     </>
   );

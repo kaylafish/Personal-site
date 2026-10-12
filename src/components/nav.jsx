@@ -1,10 +1,12 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { RESUME_FILENAME, RESUME_URL, LINKEDIN_URL } from '../site.js';
+import { usePageNavigate } from './pagelink.jsx';
 
 function Nav({ theme, setTheme }) {
   const [scrolled, setScrolled] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-  const navigate = useNavigate();
+  const navigate = usePageNavigate();
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -29,11 +31,11 @@ function Nav({ theme, setTheme }) {
       navigate('/');
       setTimeout(() => {
         const el = document.querySelector(selector);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       }, 400);
     } else {
       const el = document.querySelector(selector);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
     }
   };
 
@@ -68,7 +70,6 @@ function Nav({ theme, setTheme }) {
   );
 
   const isProjectsRoute = pathname === '/projects';
-  const isFhRoute = pathname === '/fieldhockey' || pathname === '/highlights';
 
   return (
     <nav className={`nav ${scrolled ? 'scrolled' : ''} ${open ? 'menu-open' : ''}`}>
@@ -87,7 +88,7 @@ function Nav({ theme, setTheme }) {
       </button>
 
       <div className={`nav-links ${open ? 'open' : ''}`}>
-        <a href="/#experience" onClick={goToAnchor('#experience')}>Work</a>
+        <a href="/#work" onClick={goToAnchor('#work')}>Work</a>
         <a
           href="/projects"
           onClick={goToPath('/projects')}
@@ -96,14 +97,6 @@ function Nav({ theme, setTheme }) {
           Projects
         </a>
         <a href="/#education" onClick={goToAnchor('#education')}>Education</a>
-        <a
-          href="/fieldhockey"
-          onClick={goToPath('/fieldhockey')}
-          className={isFhRoute ? 'active' : ''}
-        >
-          Field Hockey
-        </a>
-
         <span className="nav-divider"></span>
 
         <div className="nav-social">
@@ -113,7 +106,7 @@ function Nav({ theme, setTheme }) {
             </svg>
             <span className="social-label">GitHub</span>
           </a>
-          <a href="https://www.linkedin.com/in/nwfisher/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+          <a href={LINKEDIN_URL} target="_blank" rel="noreferrer" aria-label="LinkedIn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
             </svg>
@@ -122,7 +115,7 @@ function Nav({ theme, setTheme }) {
           <ThemeToggle />
         </div>
 
-        <a href="#resume" onClick={(e) => { e.preventDefault(); setOpen(false); }} className="cta">Résumé ↗</a>
+        <a href={RESUME_URL} download={RESUME_FILENAME} onClick={() => setOpen(false)} className="cta">Résumé ↗</a>
       </div>
 
       {open && <div className="nav-scrim" onClick={() => setOpen(false)} />}
