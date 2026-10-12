@@ -20,7 +20,7 @@ const CHAPTERS = [
     eyebrow: '2023 · FRC Charged Up!',
     title: <>Quetzy</>,
     body: 'As a freshman I took on programming the entire robot. It gave me my foundation in controls: a finite state machine, 2-DOF arm feedforward, and PID.',
-    tags: ['Python', 'OpenCV', 'YOLO'],
+    tags: ['Java', 'Swerve', 'PathPlanner'],
   },
   {
     slug: 'r01',

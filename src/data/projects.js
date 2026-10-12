@@ -47,30 +47,15 @@
 export const PROJECTS = [
   {
     slug: 'frc-charged-up',
-    title: 'FRC', titleItalic: 'Charged Up!',
-    kind: 'Controls · 2023', year: '2023',
+    page: 'quetzy',
+    title: 'FRC', titleItalic: 'Quetzy',
+    kind: 'Software · 2023', year: '2023',
     cover: '/assets/quetzy.webp', coverAlt: 'FRC 2023 robot',
     hero: { type: 'image', src: '/assets/quetzy.webp' },
-    facts: [{ label: 'Year', value: '2023' }, { label: 'Role', value: 'Programmer' }, { label: 'Stack', value: 'Python' }],
-    summary: 'As a freshman I programmed the entire robot: a state machine, 2-DOF arm feedforward, and PID.',
+    facts: [{ label: 'Year', value: '2023' }, { label: 'Role', value: 'Robot software' }, { label: 'Stack', value: 'Java' }],
+    summary: 'FRC 4255’s 2023 Charged Up robot. I wrote its software: one-button arm presets on motion profiles, autonomous routines, and a state machine the LEDs show.',
     links: [],
-    blocks: [
-      { type: 'text', title: 'Summary', body: 'My introduction to engineering. As a freshman I programmed the entire robot, building my foundation in controls.' },
-      { type: 'facts', title: 'System', rows: [
-        { label: 'Architecture', value: 'Finite state machine' },
-        { label: 'Arm control', value: '2-DOF feedforward + PID' },
-        { label: 'Vision', value: 'OpenCV, YOLO' },
-        { label: 'Result', value: '[How the robot performed]', todo: true },
-      ] },
-      { type: 'figure', title: 'State machine', caption: 'State diagram' },
-      { type: 'code', title: 'In code', lang: 'python', todo: true,
-        code: '# [Paste a short, readable snippet here,\n#  e.g. the arm feedforward or a state transition.\n#  10 to 20 lines is plenty.]' },
-      { type: 'figure', title: 'Tuning', caption: 'Step response before / after PID tuning' },
-      { type: 'notes', title: 'Notes', items: [
-        { label: 'What worked', body: '[...]', todo: true },
-        { label: 'What I’d change', body: '[...]', todo: true },
-      ] },
-    ],
+    blocks: [],
   },
   {
     slug: 'r01',
