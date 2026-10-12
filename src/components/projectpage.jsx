@@ -4,11 +4,12 @@ import { PROJECTS, getProject, projectModel, projectPath } from '../data/project
 import { MOBILE_QUERY, useGlassTheme, useScrollFrame } from './motion.jsx';
 import { PageLink } from './pagelink.jsx';
 import ResearchPage from './researchpage.jsx';
+import { loadModelViewer, whenSettled } from '../transitions.js';
 
 // /projects/<slug>: the "datasheet" page. One template for every project,
 // driven by its entry in data/projects.js.
 
-const ModelViewer = React.lazy(() => import('./modelviewer.jsx'));
+const ModelViewer = React.lazy(loadModelViewer);
 const pad2 = (n) => String(n).padStart(2, '0');
 
 // Height of the page hero, shared with the home page's photo-expands
@@ -108,6 +109,13 @@ function Datasheet({ slug }) {
     setTimeout(() => overlay.remove(), 520);
   }, [slug]);
 
+  // The model loads once the opening transition has landed (whenSettled).
+  const [settled, setSettled] = React.useState(false);
+  React.useLayoutEffect(() => {
+    setSettled(false);
+    return whenSettled(() => setSettled(true));
+  }, [slug]);
+
   if (!project) return <Navigate to="/projects" replace />;
 
   const model = projectModel(project);
@@ -141,11 +149,11 @@ function Datasheet({ slug }) {
           {/* Where the opening card lands (transitions.js). A 3D model takes a
               moment to load, so those pages take the card's title instead. */}
           {!model && <div className="g-pp-hero-box" data-pt-hero="" aria-hidden="true" />}
-          {model ? (
+          {model ? (settled && (
             <React.Suspense fallback={null}>
               <ModelViewer key={project.slug} hero {...model} />
             </React.Suspense>
-          ) : (
+          )) : (
             <>
               <img src={project.hero.src} alt={project.coverAlt} />
               <div className="g-pp-hero-fade" />

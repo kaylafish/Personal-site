@@ -99,6 +99,7 @@ function Hero() {
   const text = React.useRef(null);
   const card = React.useRef(null);
   const cap = React.useRef(null);
+  const draw = React.useRef(null);
   // Written straight to the DOM: this runs every frame of the first screen.
   useScrollFrame(() => {
     const p = pinProgress(ref.current);
@@ -112,6 +113,18 @@ function Hero() {
       borderRadius: `${lerp(32, 0, t)}px`,
     });
     cap.current.style.opacity = smooth((p - 0.8) / 0.15);
+    // While the card only peeks in below the headline, the drawing fits the
+    // part that shows, so the rocket is in view from the first screen (and a
+    // card opened from /projects has somewhere visible to land). It grows
+    // into the full card as the card rises. Phones keep the upright drawing.
+    if (draw.current) {
+      const vh = window.innerHeight / 100;
+      const shown = lerp(62, 100, t) * vh + Math.min(0, lerp(-50, 0, t) * vh);
+      Object.assign(draw.current.style, narrow() ? { height: '', padding: '' } : {
+        height: `${shown}px`,
+        padding: `${(1 - t) * 14}px 6% calc(${t} * 12% + ${(1 - t) * 14}px)`,
+      });
+    }
   });
   return (
     <section id="rs-hero" ref={ref} className="g-rs-pin" style={{ height: '170vh' }}>
@@ -125,7 +138,7 @@ function Hero() {
         <div ref={card} className="g-rs-hero-card" data-pt-hero="">
           {HERO_PHOTO.src && !HERO_PHOTO.drawing && <img src={HERO_PHOTO.src} alt={HERO_PHOTO.alt} />}
           {HERO_PHOTO.src && HERO_PHOTO.drawing && (
-            <div className="g-rs-hero-empty is-drawing"><img src={HERO_PHOTO.src} alt={HERO_PHOTO.alt} /></div>
+            <div ref={draw} className="g-rs-hero-empty is-drawing"><img src={HERO_PHOTO.src} alt={HERO_PHOTO.alt} data-pt-hero-img="" /></div>
           )}
           {!HERO_PHOTO.src && <div className="g-rs-hero-empty"><span className="is-todo">[Photo: the rocket on the rail, or a canard close-up]</span></div>}
           <div ref={cap} className="g-rs-hero-cap">

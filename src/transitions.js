@@ -123,8 +123,44 @@ function boxOf(el) {
       rot += (Math.atan2(m.b, m.a) * 180) / Math.PI;
     }
   }
+  // Unrotated: the on-screen box is exact, scale included.
+  if (Math.abs(rot) < 0.01) return { x: r.left, y: r.top, w: r.width, h: r.height, rot: 0 };
   return { x: r.left + r.width / 2 - w / 2, y: r.top + r.height / 2 - h / 2, w, h, rot };
 }
+
+// Box of the picture actually drawn inside an <img> with object-fit:
+// contain (and padding): where a drawing's lines really are.
+function drawnBox(img) {
+  const b = boxOf(img);
+  const cs = getComputedStyle(img);
+  const k = img.offsetWidth ? (Math.abs(b.rot) < 0.01 ? b.w / img.offsetWidth : 1) : 1;
+  const [pl, pr, pt, pb] = ['Left', 'Right', 'Top', 'Bottom'].map((d) => parseFloat(cs[`padding${d}`]) * k);
+  const cw = b.w - pl - pr, ch = b.h - pt - pb;
+  const ar = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : cw / ch;
+  let w = cw, h = cw / ar;
+  if (h > ch) { h = ch; w = ch * ar; }
+  const a = (b.rot * Math.PI) / 180, dx = (pl - pr) / 2, dy = (pt - pb) / 2;
+  const cx = b.x + b.w / 2 + dx * Math.cos(a) - dy * Math.sin(a);
+  const cy = b.y + b.h / 2 + dx * Math.sin(a) + dy * Math.cos(a);
+  return { x: cx - w / 2, y: cy - h / 2, w, h, rot: b.rot };
+}
+
+// A drawing flying on its own, outside any card.
+function drawingClone(src, box) {
+  const el = document.createElement('img');
+  el.className = 'pt-drawing';
+  el.src = src;
+  el.alt = '';
+  place(el, box);
+  getLayer().appendChild(el);
+  return el;
+}
+
+const radiusOf = (el, fallback) => parseFloat(getComputedStyle(el).borderTopLeftRadius) || fallback;
+// A drawing cover (coverFit: 'contain') flies on its own between the card and
+// the same drawing in the page's hero, marked data-pt-hero-img.
+const heroDrawing = (project) => (project.coverFit === 'contain'
+  ? document.querySelector('[data-pt-hero] [data-pt-hero-img]') : null);
 
 const onScreen = (b) => b && b.y + b.h > 0 && b.y < window.innerHeight && b.x + b.w > 0 && b.x < window.innerWidth;
 
@@ -216,13 +252,12 @@ function placeTitle(el, spot) {
 }
 
 // The page's hero, if it's there to land in right away: an image (not a
-// model that has yet to load) with at least half of it on screen.
+// model that has yet to load) at least partly on screen.
 function landingHero() {
   const el = document.querySelector('[data-pt-hero]');
   if (!el) return null;
   const b = boxOf(el);
-  const seen = Math.min(b.y + b.h, window.innerHeight) - Math.max(b.y, 0);
-  return seen >= Math.min(b.h, window.innerHeight) * 0.5 ? b : null;
+  return onScreen(b) ? b : null;
 }
 
 function sheetEl(box, rad) {
@@ -257,6 +292,32 @@ function finish() {
   if (layer) layer.replaceChildren();
   html().classList.remove('pt-busy', 'pt-leave', 'pt-hold');
   busy = false;
+  const fns = [...settleWaiters];
+  settleWaiters.clear();
+  fns.forEach((fn) => fn());
+}
+
+// Heavy work a new page would otherwise start mid-flight (loading three.js
+// and a model blocks the main thread for a good while, freezing the motion)
+// waits for the transition to finish. Returns an unsubscribe.
+const settleWaiters = new Set();
+export function whenSettled(fn) {
+  if (!busy) { fn(); return () => {}; }
+  settleWaiters.add(fn);
+  return () => settleWaiters.delete(fn);
+}
+
+// The 3D viewer's code, fetched once. Hovering a 3D project's card starts
+// it early so the model shows up sooner after the page opens.
+let viewer = null;
+export const loadModelViewer = () => (viewer ??= import('./components/modelviewer.jsx'));
+if (typeof document !== 'undefined') {
+  document.addEventListener('pointerover', (e) => {
+    if (viewer) return;
+    const el = e.target.closest?.('[data-pt-tile], [data-pt-field]');
+    const slug = el && (el.getAttribute('data-pt-tile') || el.getAttribute('data-pt-field'));
+    if (slug && getProject(slug)?.hero?.type === '3d') loadModelViewer().catch(() => { viewer = null; });
+  }, { passive: true });
 }
 
 // Something went wrong mid-transition: put everything back.
@@ -336,6 +397,10 @@ async function sheetOpen(slug, originEl, change) {
     const o = boxOf(originEl);
     const rad = parseFloat(getComputedStyle(originEl).borderTopLeftRadius) || 16;
     const card = glassCard(project, o, rad);
+    // A drawing sits where the card or tile had it (tiles pad it differently).
+    const oi = originEl.querySelector('img');
+    const ci = card.querySelector('img');
+    if (oi && ci && project.coverFit === 'contain') ci.style.padding = getComputedStyle(oi).padding;
     const sheet = sheetEl(o, rad);
     hide(originEl);
     await frame();
@@ -358,13 +423,44 @@ async function sheetOpen(slug, originEl, change) {
     await wait(D * 0.42);
     await routeChange(change, () => startBuild());
     await frame();
+    // The research hero sizes its drawing from the scroll position, which
+    // only settles a frame after the page opens at the top.
+    // Its <img> is new, so wait (briefly) for it to have a size to land on.
+    const hd = heroDrawing(project);
+    if (hd) {
+      await Promise.race([hd.decode?.().catch(() => {}), wait(150)]);
+      await frame();
+    }
 
     const h = landingHero();
     const titleEl = document.querySelector('[data-pt-title]');
     sheet.style.transition = trans(['opacity'], D * 0.45, 'ease');
     sheet.style.opacity = '0';
 
-    if (h || !titleEl) {
+    const heroImg = h && heroDrawing(project);
+    if (heroImg) {
+      // The drawing flies into its exact place in the hero; the card's
+      // glass becomes the hero's frame around it.
+      const cardImg = card.querySelector('img');
+      const dr = drawingClone(project.cover, drawnBox(cardImg));
+      cardImg.style.visibility = 'hidden';
+      hide(heroImg);
+      await frame();
+      const props = ['left', 'top', 'width', 'height', 'transform', 'border-radius'];
+      dr.style.transition = trans(props, D * 0.42);
+      place(dr, drawnBox(heroImg));
+      card.style.transition = trans(props, D * 0.42);
+      place(card, h, { rad: radiusOf(document.querySelector('[data-pt-hero]'), 24) });
+      card.classList.add('is-landing'); // caption and gradient fade
+
+      await wait(D * 0.42);
+      cleanups.forEach((fn) => fn()); // the real drawing, under the copy
+      cleanups = [];
+      card.style.transition = dr.style.transition = trans(['opacity', 'box-shadow', 'background'], D * 0.22, 'ease');
+      card.classList.remove('is-glass');
+      card.style.opacity = dr.style.opacity = '0';
+      await wait(D * 0.24);
+    } else if (h || !titleEl) {
       // Land: the card flies into the hero; the sheet clears.
       const to = h || { x: o.x, y: o.y, w: o.w, h: o.h, rot: 0 };
       card.style.transition = trans(['left', 'top', 'width', 'height', 'transform', 'border-radius'], D * 0.42);
@@ -419,8 +515,17 @@ async function sheetClose(slug, toPath, change) {
       placeTitle(clone, titleSpot(clone, titleEl));
       hide(titleEl);
     } else if (h) {
-      card = glassCard(project, { ...h, rot: 0 }, 24);
+      card = glassCard(project, { ...h, rot: 0 }, radiusOf(document.querySelector('[data-pt-hero]'), 24));
       card.style.opacity = '0';
+    }
+    // A drawing hero lifts out on its own (see heroDrawing).
+    const heroImg = card && heroDrawing(project);
+    let dr = null;
+    if (heroImg) {
+      dr = drawingClone(project.cover, drawnBox(heroImg));
+      card.querySelector('img').style.visibility = 'hidden';
+      card.classList.add('is-landing');
+      hide(heroImg);
     }
     // With neither, it's the reverse of a plain glass fade: the glass comes
     // in and the card only appears at the far end.
@@ -433,7 +538,7 @@ async function sheetClose(slug, toPath, change) {
       card.style.transition = trans(['transform', 'box-shadow', 'background', 'opacity'], D * 0.28);
       card.classList.add('is-glass');
       card.style.opacity = '1';
-      place(card, { ...h, rot: 0 }, { s: 1.04 });
+      place(card, { ...h, rot: 0 }, dr ? {} : { s: 1.04 });
     }
     setTimeout(leavePage, D * 0.2);
 
@@ -480,7 +585,17 @@ async function sheetClose(slug, toPath, change) {
       } else {
         card.style.transition = trans(props, D * 0.42);
         place(card, t, { rad });
+        if (dr) {
+          const ti = target.querySelector('img');
+          dr.style.transition = trans(props, D * 0.42);
+          if (ti) place(dr, drawnBox(ti));
+          card.classList.remove('is-landing');
+        }
         await wait(D * 0.42);
+        if (dr) {
+          card.querySelector('img').style.visibility = '';
+          dr.remove();
+        }
       }
       card.style.transition = trans(['opacity', 'box-shadow', 'background'], D * 0.22, 'ease');
       card.classList.remove('is-glass');
@@ -494,7 +609,7 @@ async function sheetClose(slug, toPath, change) {
     } else {
       // Nowhere on screen to land (e.g. the project was opened from the
       // home page's story): just let the glass clear.
-      [card, clone, sheet].forEach((el) => {
+      [card, clone, dr, sheet].forEach((el) => {
         if (!el) return;
         el.style.transition = trans(['opacity'], D * 0.42, 'ease');
         el.style.opacity = '0';
