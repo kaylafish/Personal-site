@@ -58,6 +58,48 @@ function expandInto(fromEl, src, drawing, done) {
   setTimeout(() => el.remove(), 4000); // safety net if the page never claims it
 }
 
+// An Instagram-style name tag pinned to a spot in an object-fit: cover photo.
+// `boxRef` is the box the photo fills; the tag hides if the crop cuts its spot off.
+function PhotoTag({ tag, boxRef, show = true }) {
+  const [pos, setPos] = React.useState(null);
+  // A plain effect: the parent's ref isn't attached yet during a child's layout effect.
+  React.useEffect(() => {
+    const box = boxRef.current;
+    if (!box) return undefined;
+    const place = () => {
+      const w = box.clientWidth, h = box.clientHeight;
+      if (!w || !h) { setPos(null); return; }
+      const iw = 4, ih = 3; // tagged photos are 4:3
+      const s = Math.max(w / iw, h / ih);
+      const left = (w - iw * s) / 2 + (tag.x / 100) * iw * s;
+      const top = (h - ih * s) / 2 + (tag.y / 100) * ih * s;
+      setPos(left > 40 && left < w - 40 && top > 0 && top < h - 36 ? { left, top } : null);
+    };
+    place();
+    const ro = new ResizeObserver(place);
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, [boxRef, tag.x, tag.y]);
+  if (!pos) return null;
+  return (
+    <a className={`g-photo-tag ${show ? 'is-on' : ''}`} style={pos} tabIndex={show ? 0 : -1}
+      href={`https://instagram.com/${tag.handle}`} target="_blank" rel="noopener noreferrer">
+      {tag.handle}
+    </a>
+  );
+}
+
+function ChapterPhoto({ project }) {
+  const imgRef = React.useRef(null);
+  return (
+    <div className="g-chapter-photo">
+      <img ref={imgRef} src={project.cover} alt={project.coverAlt} loading="lazy"
+        className={`g-chapter-img ${project.coverFit === 'contain' ? 'is-drawing' : ''}`} />
+      {project.coverTag && <PhotoTag tag={project.coverTag} boxRef={imgRef} />}
+    </div>
+  );
+}
+
 function Projects() {
   const chapterRefs = React.useRef([]);
   const panelRef = React.useRef(null);
@@ -108,6 +150,10 @@ function Projects() {
             <img key={c.slug} src={c.project.cover} alt={c.project.coverAlt} loading="lazy"
               className={`${i === active ? 'is-on' : ''} ${c.project.coverFit === 'contain' ? 'is-drawing' : ''}`} />
           ))}
+          {!show3d && chapters.filter((c) => c.project.coverTag).map((c) => (
+            <PhotoTag key={c.slug} tag={c.project.coverTag} boxRef={panelRef}
+              show={chapters[active].slug === c.slug} />
+          ))}
           {show3d && (
             // If the viewer's code fails to download, go back to the photo.
             <SkipOnError key={chapters[active].slug} onError={() => setView3d(false)}>
@@ -136,8 +182,7 @@ function Projects() {
         <div id="projects" className="g-chapters">
           {chapters.map((c, i) => (
             <article key={c.slug} ref={(el) => { chapterRefs.current[i] = el; }} className="g-chapter">
-              <img src={c.project.cover} alt={c.project.coverAlt} loading="lazy"
-                className={`g-chapter-img ${c.project.coverFit === 'contain' ? 'is-drawing' : ''}`} />
+              <ChapterPhoto project={c.project} />
               <span className="g-chapter-eyebrow">{c.eyebrow}</span>
               <h3 className="g-chapter-title">{c.title}</h3>
               <p className="g-chapter-body">{c.body}</p>

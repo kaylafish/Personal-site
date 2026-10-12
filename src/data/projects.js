@@ -65,6 +65,8 @@ export const PROJECTS = [
     kind: 'Mechanical · 2025', year: '2025',
     cover: '/assets/coyneinator/team-sf-regional.webp',
     coverAlt: 'FRC Team 4255 with the 2025 San Francisco Regional winner banner',
+    // Instagram-style tag on the home page photo. x/y are % of the full image.
+    coverTag: { handle: 'radmehrtp', x: 48.3, y: 61.5 },
     hero: { type: '3d', src: '/models/coyneinator.glb' },
     facts: [{ label: 'Year', value: '2025' }, { label: 'Role', value: 'Mechanical design' }, { label: 'Result', value: 'SF Regional winner' }],
     summary: 'FRC 4255’s 2025 Reefscape robot: a swerve robot with a pivoting elevator, a coaxial differential wrist and a five-joint arm that only ever moves along safe paths.',
