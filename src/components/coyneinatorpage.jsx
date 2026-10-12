@@ -10,11 +10,11 @@ import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
 import '../coyneinator.css';
 
-// /projects/frc-coyneinator: Claude Design's "Coyneinator Page". A 3D tour
-// of the 2025 robot pinned at the top, then the centre of gravity, the arm's
-// state graph, a route walked joint by joint, the control stack and the
-// code's status. Below the design: the team at the 2025 San Francisco
-// Regional, and a memorial to Robin Coyne. Its nav, side dots and progress
+// /projects/frc-coyneinator: Claude Design's "Coyneinator Page", opening
+// on a tribute to Robin Coyne, who the robot is named for. Then a pinned 3D
+// tour of the 2025 robot, the centre of gravity, the arm's state graph, a
+// route walked joint by joint, the control stack, the code's status and the
+// team at the 2025 San Francisco Regional. Its nav, side dots and progress
 // bar are the research page's (research.css). Copy that isn't a paragraph is
 // in data/coyneinator.js.
 
@@ -49,16 +49,16 @@ const pinProgress = (el) => {
   return clamp(-r.top / Math.max(1, r.height - window.innerHeight));
 };
 
-function jumpTo(id) {
+function jumpTo(id, offset = 80) {
   return (e) => {
     if (e) e.preventDefault();
     const el = document.getElementById(id);
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
   };
 }
 
 const CHAPTERS = [
-  ['cy-robot', 'The robot'], ['cy-cog', 'Centre of gravity'], ['cy-graph', 'State graph'],
+  ['cy-tribute', 'In memory'], ['cy-robot', 'The robot'], ['cy-cog', 'Centre of gravity'], ['cy-graph', 'State graph'],
   ['cy-route', 'Walking a route'], ['cy-stack', 'Control stack'], ['cy-more', 'Status'], ['cy-team', 'The team'],
 ];
 
@@ -224,7 +224,7 @@ function Tour({ narrow }) {
 
         <div className={`g-cy-hero ${si === 0 ? '' : 'is-off'}`}>
           <span className="g-rs-eyebrow">FRC Team 4255 · 2025 Reefscape robot</span>
-          <h1 data-pt-title=""><em>Coyneinator.</em></h1>
+          <h1><em>Coyneinator.</em></h1>
           <p>A swerve robot with a pivoting elevator, a coaxial differential wrist and a five-joint arm that only ever moves along safe paths.</p>
           <span className="g-cy-hero-note">1.4 ft tall folded, 7 ft fully up</span>
         </div>
@@ -462,16 +462,26 @@ function Team() {
   );
 }
 
-// Quiet on purpose: no motion, no hover effects.
-function Memorial() {
+// The page opens on the tribute: the robot is named for Robin Coyne. Quiet
+// on purpose: the photos sit still; only the scroll cue's arrow moves.
+function Tribute() {
+  const [before, after] = MEMORIAL.split('Robin Coyne');
   return (
-    <section className="g-cy-memorial" aria-labelledby="cy-memorial">
-      <p id="cy-memorial">{MEMORIAL}</p>
-      <div className="g-cy-memorial-photos">
-        {ROBIN_PHOTOS.map((ph) => (
-          <img key={ph.src} src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} loading="lazy" decoding="async" />
-        ))}
+    <section id="cy-tribute" className="g-cy-tribute" aria-labelledby="cy-tribute-text">
+      <div className="g-cy-tribute-inner">
+        <p id="cy-tribute-text" data-build="" style={{ '--b': 1 }}>{before}<em>Robin Coyne</em>{after}</p>
+        <div className="g-cy-prints" data-build="" style={{ '--b': 2 }}>
+          {ROBIN_PHOTOS.map((ph) => (
+            <figure key={ph.src}>
+              <img src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} decoding="async" />
+            </figure>
+          ))}
+        </div>
       </div>
+      <a href="#cy-robot" onClick={jumpTo('cy-robot', 0)} className="g-cy-named" data-build="" style={{ '--b': 3 }}>
+        <span>Our 2025 Reefscape robot, named:</span>
+        <span className="g-cy-named-arrow" aria-hidden="true">↓</span>
+      </a>
     </section>
   );
 }
@@ -485,6 +495,7 @@ function CoyneinatorPage() {
       <Nav />
       <Rail />
       <main data-pt-page="">
+        <Tribute />
         <Tour narrow={narrow} />
         <Cog />
         <Graph />
@@ -492,7 +503,6 @@ function CoyneinatorPage() {
         <Stack />
         <More />
         <Team />
-        <Memorial />
         <footer className="g-cy-foot">
           <a href="/projects" onClick={toAll}>← All projects</a>
           <span>© 2026 Mikayla Fisher</span>

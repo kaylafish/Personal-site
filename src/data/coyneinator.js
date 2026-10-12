@@ -94,7 +94,7 @@ export const TEAM_PHOTO = {
   alt: 'FRC Team 4255 in green team shirts, kneeling and standing in a gym around the blue 2025 San Francisco Regional winner banner, with medals and the Reefscape trophy',
 };
 
-// The memorial at the foot of the page. Mikayla's wording; keep it verbatim.
+// The tribute that opens the page. Mikayla's wording; keep it verbatim.
 export const MEMORIAL = 'In loving memory of my mentor, Robin Coyne, thanks for all that you have taught me and thousands of others';
 export const ROBIN_PHOTOS = [
   { src: '/assets/coyneinator/robin-1.webp', w: 624, h: 498, alt: 'Robin Coyne smiling at a table in the pits, holding a machined plate' },
