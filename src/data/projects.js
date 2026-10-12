@@ -15,7 +15,7 @@
 //   hero         top of the project page:
 //                  { type: 'image', src }            full-bleed photo
 //                  { type: '3d', src: '/models/x.glb' }   interactive model
-//                options for 3d: up: 'z', note: '...', builtin: 'r01'
+//                options for 3d: up: 'z', note: '...'
 //   facts        exactly three label/value pairs for the title block
 //   summary      one or two sentences
 //   links        [{ label, href }] — optional
@@ -70,33 +70,6 @@ export const PROJECTS = [
       { type: 'notes', title: 'Notes', items: [
         { label: 'What worked', body: '[...]', todo: true },
         { label: 'What I’d change', body: '[...]', todo: true },
-      ] },
-    ],
-  },
-  {
-    slug: 'r01',
-    title: 'Model rocket', titleItalic: 'R01',
-    kind: 'Rocketry', year: '',
-    cover: '/assets/project.webp', coverAlt: 'Model rocket R01',
-    hero: { type: '3d', builtin: 'r01', note: 'Placeholder model' },
-    facts: [{ label: 'Motor', value: 'G80' }, { label: 'Apogee', value: '3,000 ft' }, { label: 'Stack', value: 'C++' }],
-    summary: 'My first rocket design, flown on a G80 motor. It reached an apogee of 3,000 feet.',
-    links: [],
-    blocks: [
-      { type: 'text', title: 'Summary', body: 'My first rocket design, flown on a G80 motor. It reached an apogee of 3,000 feet.' },
-      { type: 'facts', title: 'Key facts', rows: [
-        { label: 'Motor', value: 'G80' },
-        { label: 'Apogee', value: '3,000 ft' },
-        { label: 'Stack', value: 'C++' },
-        { label: 'Recovery', value: '[method]', todo: true },
-      ] },
-      { type: 'figure', title: 'Design', caption: 'Cross-section or simulation screenshot' },
-      { type: 'figure', title: 'Flight data', caption: 'Altitude vs. time plot' },
-      { type: 'notes', title: 'Notes', items: [
-        { label: 'Stability', body: '[CG/CP and how you checked it.]', todo: true },
-        { label: 'Firmware', body: '[What the C++ did on board.]', todo: true },
-        { label: 'What went wrong', body: '[Be honest.]', todo: true },
-        { label: 'Next revision', body: '[What R02 changes.]', todo: true },
       ] },
     ],
   },

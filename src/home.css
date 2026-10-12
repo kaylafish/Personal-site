@@ -490,6 +490,14 @@ html.glass-home body { overflow-x: clip; }
   background-size: 24px 24px;
 }
 .g-drawing img { object-fit: contain !important; padding: 0 7%; box-sizing: border-box; }
+.g-story-panel > img.is-drawing, .g-chapter-img.is-drawing {
+  object-fit: contain; padding: 0 7%; box-sizing: border-box;
+  background-color: #0d1420;
+  background-image:
+    linear-gradient(rgba(140, 160, 190, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140, 160, 190, .07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
 .g-tile-feat .g-drawing img { padding: 0 8% 24%; }
 .g-pp-next.g-drawing img { padding: 0 6% 0 40%; }
 
