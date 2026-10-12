@@ -142,7 +142,7 @@ class CoyneStage {
       this.cb.onLoaded?.();
     }, (e) => {
       if (e.total) this.cb.onProgress?.(e.loaded / e.total);
-    }, (err) => console.warn('Coyneinator model failed to load', err));
+    }, (err) => { console.warn('Coyneinator model failed to load', err); this.cb.onError?.(); });
 
     this.raf = 0;
     this.last = 0;
@@ -599,18 +599,20 @@ class CoyneStage {
   }
 }
 
-function CoyneView({ src, focus, pose, yaw, shift, onProgress, onLoaded, className }) {
+function CoyneView({ src, focus, pose, yaw, shift, onProgress, onLoaded, onError, className }) {
   const host = React.useRef(null);
   const stage = React.useRef(null);
   const cb = React.useRef({});
   cb.current.onProgress = onProgress;
   cb.current.onLoaded = onLoaded;
+  cb.current.onError = onError;
   React.useEffect(() => {
     let s;
     // No WebGL (blocked, or an old device): the page still works without
     // the model.
     try { s = new CoyneStage(host.current, src, cb.current); } catch (err) {
       console.warn('Coyneinator model unavailable', err);
+      cb.current.onError?.();
       return undefined;
     }
     stage.current = s;

@@ -116,7 +116,7 @@ class QuetzyStage {
       this.cb.onLoaded?.();
     }, (e) => {
       if (e.total) this.cb.onProgress?.(e.loaded / e.total);
-    }, (err) => console.warn('Quetzy model failed to load', err));
+    }, (err) => { console.warn('Quetzy model failed to load', err); this.cb.onError?.(); });
     this.raf = 0;
     this.last = 0;
     this.wake();
@@ -329,12 +329,13 @@ class QuetzyStage {
   }
 }
 
-function QuetzyView({ src, focus, yaw, shift, onProgress, onLoaded, className }) {
+function QuetzyView({ src, focus, yaw, shift, onProgress, onLoaded, onError, className }) {
   const host = React.useRef(null);
   const stage = React.useRef(null);
   const cb = React.useRef({});
   cb.current.onProgress = onProgress;
   cb.current.onLoaded = onLoaded;
+  cb.current.onError = onError;
 
   React.useEffect(() => {
     let s;
@@ -342,6 +343,7 @@ function QuetzyView({ src, focus, yaw, shift, onProgress, onLoaded, className })
     // the model.
     try { s = new QuetzyStage(host.current, src, cb.current); } catch (err) {
       console.warn('Quetzy model unavailable', err);
+      cb.current.onError?.();
       return undefined;
     }
     stage.current = s;

@@ -57,7 +57,7 @@ function textureColor(mesh, cache) {
 }
 
 class RobotStage {
-  constructor(host, { src, subsystems }) {
+  constructor(host, { src, subsystems, onError }) {
     this.host = host;
     this.plan = Object.fromEntries(subsystems.map((s) => [norm(s.node), s.explode]));
     this.want = { explode: 0, focus: '', spin: 0.1, shift: 0, lift: 0 };
@@ -102,7 +102,7 @@ class RobotStage {
     new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
       if (this.dead) disposeTree(g.scene);
       else this.setup(g.scene);
-    }, undefined, (err) => console.warn('REBUILT model failed to load', err));
+    }, undefined, (err) => { console.warn('REBUILT model failed to load', err); onError(); });
 
     this.raf = 0;
     this.last = 0;
@@ -301,15 +301,18 @@ class RobotStage {
   }
 }
 
-function RobotExplode({ src, subsystems, explode, focus, spin, shift, lift, className }) {
+function RobotExplode({ src, subsystems, explode, focus, spin, shift, lift, onError, className }) {
   const host = React.useRef(null);
   const stage = React.useRef(null);
+  const fail = React.useRef(onError);
+  fail.current = onError;
   React.useEffect(() => {
     let s;
     // No WebGL (blocked, or an old device): the page still works without
     // the model.
-    try { s = new RobotStage(host.current, { src, subsystems }); } catch (err) {
+    try { s = new RobotStage(host.current, { src, subsystems, onError: () => fail.current?.() }); } catch (err) {
       console.warn('REBUILT model unavailable', err);
+      fail.current?.();
       return undefined;
     }
     stage.current = s;

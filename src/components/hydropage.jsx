@@ -3,8 +3,10 @@ import { RESUME_FILENAME, RESUME_URL } from '../site.js';
 import {
   CALIBRATION, CHAIN, DROPS, FIXES, PHOTOS, RIG_STEPS, STATS, TRIALS, WHY,
 } from '../data/hydro.js';
+import { getProject } from '../data/projects.js';
 import { ProgressBar } from './home.jsx';
 import { clamp, prefersReducedMotion, useGlassTheme, useScrollFrame } from './motion.jsx';
+import { ModelFallback, SkipOnError } from './modelfallback.jsx';
 import { PageLink } from './pagelink.jsx';
 import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
@@ -19,14 +21,7 @@ import '../hydro.css';
 // three.js only loads on this page.
 const HydroView = React.lazy(() => import('./hydroview.jsx'));
 const MODEL = '/models/hydro.glb';
-
-// If the viewer's code can't load (offline, a stale deploy), the page goes
-// on without the model.
-class SkipOnError extends React.Component {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? null : this.props.children; }
-}
+const COVER = getProject('hydro-generator');
 
 const NARROW = '(max-width: 759px)';
 function useNarrow() {
@@ -117,19 +112,12 @@ function Rig({ narrow }) {
   const [p, setP] = React.useState(0);
   useScrollFrame(() => setP(Math.round(pinProgress(ref.current) * 1000) / 1000));
 
-  // Arriving from the home page's story, its photo has grown to fill the
-  // top of the screen (see projects.jsx). Fade it out to reveal the rig.
-  React.useEffect(() => {
-    const overlay = document.querySelector('.g-expand');
-    if (!overlay) return;
-    overlay.style.transition = 'opacity .5s ease';
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 520);
-  }, []);
-
   // The model loads once the opening transition has landed: loading
   // three.js mid-flight would freeze the motion.
   const [settled, setSettled] = React.useState(false);
+  // No WebGL, or the model or viewer failed to load: show the cover photo.
+  const [modelFailed, setModelFailed] = React.useState(false);
+  const onModelError = React.useCallback(() => setModelFailed(true), []);
   React.useLayoutEffect(() => whenSettled(() => setSettled(true)), []);
 
   const step = Math.min(3, Math.floor(p * 4));
@@ -146,9 +134,11 @@ function Rig({ narrow }) {
   return (
     <section id="hy-rig" ref={ref} className="g-rs-pin" style={{ height: '520vh' }}>
       <div className="g-rs-sticky g-hy-rig">
-        {settled && <SkipOnError>
+        {modelFailed ? <ModelFallback className="g-hy-model" src={COVER.cover} alt={COVER.coverAlt} />
+          : settled && <SkipOnError onError={onModelError}>
           <React.Suspense fallback={null}>
             <HydroView
+              onError={onModelError}
               className="g-hy-model"
               src={MODEL}
               focus={view.focus}

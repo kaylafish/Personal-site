@@ -599,6 +599,7 @@ html.glass-home body { overflow-x: clip; }
   opacity: 0; transition: opacity .6s .3s;
 }
 .g-expand.is-open::after { opacity: 1; }
+.g-expand.is-drawing { background-color: #0d1420; background-size: contain; background-repeat: no-repeat; background-origin: content-box; padding: 0 7%; box-sizing: border-box; }
 
 /* ===============================================
    "AND SO MUCH MORE" (drift field)
@@ -979,3 +980,24 @@ html.pt-build [data-build] {
 html.pt-build-fade [data-pt-page] { animation: pt-fade .42s ease both; }
 @keyframes pt-fade { from { opacity: 0; } }
 @keyframes pt-rise { from { transform: translateY(22px); } }
+
+/* ============================================================================
+   3D FALLBACK (modelfallback.jsx): the cover photo, dimmed so the tour text
+   over it stays readable, in place of a model that can't be shown.
+   ============================================================================ */
+.g-model-fallback { z-index: 0 !important; overflow: hidden; pointer-events: none; }
+.g-model-fallback img { width: 100%; height: 100%; object-fit: cover; opacity: .28; }
+.g-model-fallback span {
+  position: absolute; right: 18px; top: 96px;
+  font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: #8d97a6;
+}
+
+/* App-level error screen (App.jsx). */
+.g-app-error {
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  background: #0b111b; color: #eef1f5; font-family: "Geist", system-ui, sans-serif; font-size: 17px;
+}
+.g-app-error button {
+  padding: 12px 22px; border: 0; border-radius: 999px; background: #eef1f5; color: #0b111b;
+  font: inherit; font-weight: 500; cursor: pointer;
+}

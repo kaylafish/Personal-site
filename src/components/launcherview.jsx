@@ -33,7 +33,7 @@ const BALL = /game.?piece/i;
 
 
 class LauncherStage {
-  constructor(host, src, view) {
+  constructor(host, src, view, onError) {
     this.host = host;
     this.view = view;
     this.c = { explode: 1, yaw: 0.6, shift: 0, fo: 0, top: 0, bottom: 0 };
@@ -75,7 +75,7 @@ class LauncherStage {
     new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
       if (this.dead) disposeTree(g.scene);
       else this.setup(g.scene);
-    }, undefined, (err) => console.warn('Launcher model failed to load', err));
+    }, undefined, (err) => { console.warn('Launcher model failed to load', err); onError(); });
 
     this.raf = 0;
     this.last = 0;
@@ -297,14 +297,17 @@ class LauncherStage {
   }
 }
 
-function LauncherView({ src, view, className }) {
+function LauncherView({ src, view, onError, className }) {
   const host = React.useRef(null);
+  const fail = React.useRef(onError);
+  fail.current = onError;
   React.useEffect(() => {
     let s;
     // No WebGL (blocked, or an old device): the page still works without
     // the model.
-    try { s = new LauncherStage(host.current, src, view); } catch (err) {
+    try { s = new LauncherStage(host.current, src, view, () => fail.current?.()); } catch (err) {
       console.warn('Launcher model unavailable', err);
+      fail.current?.();
       return undefined;
     }
     return () => s.dispose();

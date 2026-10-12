@@ -11,6 +11,7 @@ import PageNav from './components/pagenav.jsx';
 import { usePageNavigate } from './components/pagelink.jsx';
 import { getProject } from './data/projects.js';
 import { locationCommitted, registerNavigate } from './transitions.js';
+import { SITE_URL, metaFor } from './routemeta.js';
 
 const FH_SECTIONS = [
   { id: 'fh-top',         label: 'Top' },
@@ -33,6 +34,25 @@ function ScrollManager() {
   return null;
 }
 
+// Keeps the tab title, canonical URL and share tags in step with the page.
+// The build writes the same tags into each page's HTML (vite.config.js).
+function HeadManager() {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    const page = metaFor(pathname);
+    const url = SITE_URL + (page.path === '/' ? '/' : page.path);
+    const set = (sel, attr, val) => { const el = document.head.querySelector(sel); if (el) el.setAttribute(attr, val); };
+    document.title = page.title;
+    set('meta[name="description"]', 'content', page.description);
+    set('link[rel="canonical"]', 'href', url);
+    set('meta[property="og:url"]', 'content', url);
+    set('meta[property="og:title"]', 'content', page.title);
+    set('meta[property="og:description"]', 'content', page.description);
+    set('meta[property="og:image"]', 'content', SITE_URL + page.image);
+  }, [pathname]);
+  return null;
+}
+
 // Lets transitions.js change routes and know when a new page is in the DOM.
 // Rendered after <Routes> so its layout effect runs once the page's own have.
 function TransitionBridge() {
@@ -40,6 +60,16 @@ function TransitionBridge() {
   const { pathname } = useLocation();
   React.useLayoutEffect(() => { registerNavigate(navigate); }, [navigate]);
   React.useLayoutEffect(() => { locationCommitted(pathname); }, [pathname]);
+  // Arriving from the home page's story, its photo has grown to fill the top
+  // of the screen (see projects.jsx). Fade it out to reveal the new page.
+  // Done here so no page can forget it.
+  React.useEffect(() => {
+    const overlay = document.querySelector('.g-expand');
+    if (!overlay) return;
+    overlay.style.transition = 'opacity .5s ease';
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.remove(), 520);
+  }, [pathname]);
   return null;
 }
 
@@ -112,6 +142,7 @@ function Shell() {
   return (
     <>
       <ScrollManager />
+      <HeadManager />
       {usesPageNav(pathname) && <PageNav />}
       {/* The glass pages (home, projects) bring their own navigation. */}
       {LEGACY_ROUTES.includes(pathname.replace(/\/+$/, '')) && <Nav theme={theme} setTheme={setTheme} />}
@@ -128,12 +159,46 @@ function Shell() {
   );
 }
 
+// Last line of defence: a page that throws shows a way out instead of a blank
+// screen. The 3D viewers have their own boundaries (modelfallback.jsx).
+class AppErrorBoundary extends React.Component {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(err) { console.error(err); } // eslint-disable-line no-console
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div className="g-app-error">
+        <p>Something went wrong loading this page.</p>
+        <button type="button" onClick={() => window.location.reload()}>Reload</button>
+      </div>
+    );
+  }
+}
+
+// After a new deploy, an open tab still asks for the old build's code files,
+// which no longer exist. Reload once to pick up the new build; the guard
+// stops a reload loop when the network itself is down.
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', (e) => {
+    try {
+      const last = +sessionStorage.getItem('mf_reloaded') || 0;
+      if (Date.now() - last < 30000) return;
+      sessionStorage.setItem('mf_reloaded', String(Date.now()));
+    } catch (err) { return; }
+    e.preventDefault();
+    window.location.reload();
+  });
+}
+
 export default function App() {
   return (
     // Synchronous route updates: the page transitions need the new page in
     // the DOM as soon as they navigate.
     <BrowserRouter unstable_useTransitions={false}>
-      <Shell />
+      <AppErrorBoundary>
+        <Shell />
+      </AppErrorBoundary>
     </BrowserRouter>
   );
 }

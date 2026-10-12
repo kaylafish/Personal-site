@@ -70,7 +70,7 @@ function mergeParts(main) {
 }
 
 class RigStage {
-  constructor(host, src) {
+  constructor(host, src, onError) {
     this.host = host;
     this.want = { focus: '', w: 0, marks: 0, hsel: 0.35, yaw: 0.8, shift: 0 };
     this.cur = { explode: prefersReducedMotion() ? 0 : 1, yaw: 0.8, shift: 0, f: [1, 0, 0], w: 0, marks: 0, hs: 0.35 };
@@ -111,7 +111,7 @@ class RigStage {
     new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
       if (this.dead) disposeTree(g.scene);
       else this.setup(g.scene);
-    }, undefined, (err) => console.warn('Hydro model failed to load', err));
+    }, undefined, (err) => { console.warn('Hydro model failed to load', err); onError(); });
 
     this.raf = 0;
     this.last = 0;
@@ -341,15 +341,18 @@ class RigStage {
   }
 }
 
-function HydroView({ src, focus, w, marks, hsel, yaw, shift, className }) {
+function HydroView({ src, focus, w, marks, hsel, yaw, shift, onError, className }) {
   const host = React.useRef(null);
   const stage = React.useRef(null);
+  const fail = React.useRef(onError);
+  fail.current = onError;
   React.useEffect(() => {
     let s;
     // No WebGL (blocked, or an old device): the page still works without
     // the model.
-    try { s = new RigStage(host.current, src); } catch (err) {
+    try { s = new RigStage(host.current, src, () => fail.current?.()); } catch (err) {
       console.warn('Hydro model unavailable', err);
+      fail.current?.();
       return undefined;
     }
     stage.current = s;

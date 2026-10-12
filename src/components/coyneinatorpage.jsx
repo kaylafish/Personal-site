@@ -3,8 +3,10 @@ import { RESUME_FILENAME, RESUME_URL } from '../site.js';
 import {
   COG_FACTS, GRAPH_NOTES, GRAPH_STATS, HOPS, IDLE, MEMORIAL, MORE, ROBIN_PHOTOS, STATUS, TEAM_PHOTO, TOUR,
 } from '../data/coyneinator.js';
+import { getProject } from '../data/projects.js';
 import { ProgressBar } from './home.jsx';
 import { clamp, easeInOutCubic, prefersReducedMotion, useGlassTheme, useScrollFrame } from './motion.jsx';
+import { ModelFallback, SkipOnError } from './modelfallback.jsx';
 import { PageLink } from './pagelink.jsx';
 import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
@@ -21,14 +23,7 @@ import '../coyneinator.css';
 // three.js only loads on this page.
 const CoyneView = React.lazy(() => import('./coyneview.jsx'));
 const MODEL = '/models/coyneinator.glb';
-
-// If the viewer's code can't load (offline, a stale deploy), the page goes
-// on without the model.
-class SkipOnError extends React.Component {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? null : this.props.children; }
-}
+const COVER = getProject('frc-coyneinator');
 
 const NARROW = '(max-width: 759px)';
 function useNarrow() {
@@ -175,19 +170,12 @@ function Tour({ narrow }) {
   const [ld, setLd] = React.useState(0);
   const [loaded, setLoaded] = React.useState(false);
 
-  // Arriving from the home page's story, its photo has grown to fill the
-  // top of the screen (see projects.jsx). Fade it out to reveal the robot.
-  React.useEffect(() => {
-    const overlay = document.querySelector('.g-expand');
-    if (!overlay) return;
-    overlay.style.transition = 'opacity .5s ease';
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 520);
-  }, []);
-
   // The model loads once the opening transition has landed: loading
   // three.js mid-flight would freeze the motion.
   const [settled, setSettled] = React.useState(false);
+  // No WebGL, or the model or viewer failed to load: show the cover photo.
+  const [modelFailed, setModelFailed] = React.useState(false);
+  const onModelError = React.useCallback(() => setModelFailed(true), []);
   React.useLayoutEffect(() => whenSettled(() => setSettled(true)), []);
 
   const si = Math.min(STOPS - 1, Math.floor(p * STOPS));
@@ -207,9 +195,11 @@ function Tour({ narrow }) {
   return (
     <section id="cy-robot" ref={ref} className="g-rs-pin g-cy-tour">
       <div className="g-rs-sticky g-cy-tour-sticky">
-        {settled && <SkipOnError>
+        {modelFailed ? <ModelFallback className="g-cy-model" src={COVER.cover} alt={COVER.coverAlt} />
+          : settled && <SkipOnError onError={onModelError}>
           <React.Suspense fallback={null}>
             <CoyneView
+              onError={onModelError}
               className="g-cy-model"
               src={MODEL}
               focus={focus}
@@ -256,7 +246,7 @@ function Tour({ narrow }) {
         <div className={`g-cy-dots ${si === 0 ? 'is-off' : ''}`}>
           {TOUR.map((s, i) => <span key={s.kicker} className={i === ti ? 'is-on' : ''} />)}
         </div>
-        {settled && !loaded && (
+        {settled && !loaded && !modelFailed && (
           <div className="g-cy-loading">
             <span>Loading the CAD · {Math.round(ld * 100)}%</span>
             <span className="g-cy-loading-bar"><span style={{ width: `${ld * 100}%` }} /></span>
