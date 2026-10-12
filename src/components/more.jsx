@@ -1,7 +1,7 @@
 import React from 'react';
 import { PROJECTS } from '../data/projects.js';
 import { MOBILE_QUERY, prefersReducedMotion } from './motion.jsx';
-import { PageLink } from './pagelink.jsx';
+import { openAllProjects } from '../transitions.js';
 import ProjectCard from './projectcard.jsx';
 
 // "And so much more": every project as a card floating around a handwritten
@@ -42,10 +42,14 @@ function More() {
       raf = requestAnimationFrame(tick);
       const dt = Math.min(50, now - (last || now));
       last = now;
-      speed += ((hover ? 0.15 : 1) - speed) * 0.06; // hovering slows the drift
-      t += (dt * speed) / 1000;
-      sx += (mx - sx) * 0.06;
-      sy += (my - sy) * 0.06;
+      // While cards fly back in from /projects (transitions.js) the field
+      // holds still, so they land where the real cards are.
+      if (!document.documentElement.classList.contains('pt-hold')) {
+        speed += ((hover ? 0.15 : 1) - speed) * 0.06; // hovering slows the drift
+        t += (dt * speed) / 1000;
+        sx += (mx - sx) * 0.06;
+        sy += (my - sy) * 0.06;
+      }
       cards.forEach((c, i) => {
         const z = +c.dataset.depth, ph = i * 1.3;
         const x = -sx * z * 60;
@@ -53,6 +57,7 @@ function More() {
         const r = +c.dataset.rot + Math.sin(t * 0.5 + ph) * 1.2;
         c.style.transform = `translate3d(${x}px,${y}px,0) rotate(${r}deg)`;
       });
+      stage.dataset.live = '';
     };
     // Only animate while the field is on screen.
     const io = new IntersectionObserver(([en]) => {
@@ -75,9 +80,17 @@ function More() {
       <div ref={stageRef} className="g-field">
         <div className="g-field-centre">
           <span className="g-field-line">and so much more.</span>
-          <PageLink to="/projects" className="g-glass-pill">
+          <a
+            href="/projects"
+            className="g-glass-pill"
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // new-tab clicks
+              e.preventDefault();
+              openAllProjects(); // every card flies into its tile
+            }}
+          >
             See all {PROJECTS.length} projects <span>→</span>
-          </PageLink>
+          </a>
         </div>
         {shown.map((p, i) => {
           const [x, y, w, rot, depth] = SLOTS[i];

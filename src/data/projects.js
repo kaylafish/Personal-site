@@ -10,6 +10,8 @@
 //   kind         small caps line above the title on the project page
 //   year         shown on cards; leave '' if it doesn't apply
 //   cover        card + story photo (in /public/assets)
+//   coverFit     optional: 'contain' shows the whole cover on a grid, for
+//                drawings that mustn't be cropped
 //   hero         top of the project page:
 //                  { type: 'image', src }            full-bleed photo
 //                  { type: '3d', src: '/models/x.glb' }   interactive model
@@ -17,6 +19,8 @@
 //   facts        exactly three label/value pairs for the title block
 //   summary      one or two sentences
 //   links        [{ label, href }] — optional
+//   featured     optional: a short label (e.g. 'Active research'); makes this
+//                the big tile on /projects. One project at a time.
 //   page         optional: 'research' gives the project its own bespoke page
 //                (components/researchpage.jsx; 'rebuilt' → rebuiltpage.jsx)
 //                instead of the datasheet below,
@@ -109,10 +113,13 @@ export const PROJECTS = [
   {
     slug: 'canard-roll-reversal',
     page: 'research',
+    featured: 'Active research',
     title: 'Canard', titleItalic: 'roll reversal',
     kind: 'Research · Controls', year: '2026',
-    // Swap for a photo of the rocket once there is one (also HERO_PHOTO in data/research.js).
-    cover: '/assets/research/fig3.webp', coverAlt: 'Plot of canard roll against incidence',
+    // Same drawing as the page hero (HERO_PHOTO in data/research.js); swap
+    // both for a photo of the rocket once there is one.
+    cover: '/assets/research/voyager-profile.webp', coverFit: 'contain',
+    coverAlt: 'Side profile of the rocket from OpenRocket',
     hero: { type: 'image', src: '/assets/research/fig3.webp' },
     facts: [{ label: 'Status', value: 'Active' }, { label: 'Method', value: 'LQR · INDI' }, { label: 'Tools', value: 'Python · RocketPy' }],
     summary: 'Simulation research on keeping a canard-steered rocket in control when its roll authority peaks and then reverses.',

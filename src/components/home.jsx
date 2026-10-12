@@ -56,7 +56,7 @@ function Home() {
   return (
     <div className="glass">
       <GlassBar idx={idx} ready={ready} onSlide={(i) => { setIdx(i); startTimer(); }} />
-      <main>
+      <main data-pt-page="">
         <Hero idx={idx} ready={ready} />
         <Intro />
         <Toolkit />
