@@ -66,7 +66,7 @@ function FieldHockey({ onViewAll }) {
           </div>
         </div>
         <div className="action-shot">
-          <img src="/assets/action.webp" alt="" loading="lazy" />
+          <img src="/assets/action.webp" alt="" fetchpriority="high" />
         </div>
       </section>
 

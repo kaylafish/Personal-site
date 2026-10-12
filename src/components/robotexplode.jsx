@@ -1,10 +1,8 @@
 import React from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { easeInOutCubic, prefersReducedMotion } from './motion.jsx';
-import { disposeTree } from './threeutil.js';
+import { disposeTree, loadModel } from './threeutil.js';
 
 // The REBUILT robot for the top of its project page (rebuiltpage.jsx), on a
 // transparent canvas so the page shows through. Loaded lazily, so three.js
@@ -99,10 +97,10 @@ class RobotStage {
     this.onVis = () => this.wake();
     document.addEventListener('visibilitychange', this.onVis);
 
-    new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
+    loadModel(src).then((g) => {
       if (this.dead) disposeTree(g.scene);
       else this.setup(g.scene);
-    }, undefined, (err) => { console.warn('REBUILT model failed to load', err); onError(); });
+    }, (err) => { console.warn('REBUILT model failed to load', err); onError(); });
 
     this.raf = 0;
     this.last = 0;

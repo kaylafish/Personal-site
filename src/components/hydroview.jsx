@@ -1,11 +1,9 @@
 import React from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { prefersReducedMotion } from './motion.jsx';
-import { disposeTree, partKey as key, toFloat } from './threeutil.js';
+import { disposeTree, partKey as key, toFloat, loadModel } from './threeutil.js';
 
 // The hydro generator rig for the top of its project page (hydropage.jsx),
 // on a transparent canvas. Ported from Claude Design's hydro-view.js; loaded
@@ -108,10 +106,10 @@ class RigStage {
     this.onVis = () => this.wake();
     document.addEventListener('visibilitychange', this.onVis);
 
-    new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
+    loadModel(src).then((g) => {
       if (this.dead) disposeTree(g.scene);
       else this.setup(g.scene);
-    }, undefined, (err) => { console.warn('Hydro model failed to load', err); onError(); });
+    }, (err) => { console.warn('Hydro model failed to load', err); onError(); });
 
     this.raf = 0;
     this.last = 0;

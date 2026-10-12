@@ -1,11 +1,9 @@
 import React from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { prefersReducedMotion } from './motion.jsx';
-import { disposeTree, partKey as key } from './threeutil.js';
+import { disposeTree, partKey as key, loadModel } from './threeutil.js';
 
 // The 2025 Coyneinator for the top of its project page (coyneinatorpage.jsx),
 // on a transparent canvas. Ported from Claude Design's coyne-view.js; loaded
@@ -135,13 +133,11 @@ class CoyneStage {
     this.onVis = () => this.wake();
     document.addEventListener('visibilitychange', this.onVis);
 
-    new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(src, (g) => {
+    loadModel(src, (f) => this.cb.onProgress?.(f)).then((g) => {
       if (this.dead) { disposeTree(g.scene); return; }
       this.setup(g.scene);
       if (prefersReducedMotion()) this.cur.explode = 0;
       this.cb.onLoaded?.();
-    }, (e) => {
-      if (e.total) this.cb.onProgress?.(e.loaded / e.total);
     }, (err) => { console.warn('Coyneinator model failed to load', err); this.cb.onError?.(); });
 
     this.raf = 0;
