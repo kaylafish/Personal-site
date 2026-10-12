@@ -3,8 +3,10 @@ import { RESUME_FILENAME, RESUME_URL } from '../site.js';
 import {
   CONTROLS, DEFAULT_MODE, MECHANISMS, MODES, SHOP_PHOTOS, STATS, SUBSYSTEMS,
 } from '../data/rebuilt.js';
+import { getProject } from '../data/projects.js';
 import { ProgressBar } from './home.jsx';
 import { clamp, useGlassTheme, useScrollFrame } from './motion.jsx';
+import { ModelFallback, SkipOnError } from './modelfallback.jsx';
 import { PageLink } from './pagelink.jsx';
 import { goBackTo, whenSettled } from '../transitions.js';
 import '../research.css';
@@ -19,14 +21,7 @@ import '../rebuilt.css';
 // three.js only loads on this page.
 const RobotExplode = React.lazy(() => import('./robotexplode.jsx'));
 const MODEL = '/models/rebuilt.glb';
-
-// If the viewer's code can't load (offline, a stale deploy), the page goes
-// on without the model.
-class SkipOnError extends React.Component {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? null : this.props.children; }
-}
+const COVER = getProject('frc-rebuilt');
 
 const smooth = (t) => { t = clamp(t); return t * t * (3 - 2 * t); };
 const NARROW = '(max-width: 759px)';
@@ -139,19 +134,12 @@ function CadTour({ narrow }) {
       : p >= HERO * 0.7 ? EXPLODED : ASSEMBLED);
   });
 
-  // Arriving from the home page's story, its photo has grown to fill the
-  // top of the screen (see projects.jsx). Fade it out to reveal the robot.
-  React.useEffect(() => {
-    const overlay = document.querySelector('.g-expand');
-    if (!overlay) return;
-    overlay.style.transition = 'opacity .5s ease';
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 520);
-  }, []);
-
   // The model loads once the opening transition has landed: loading
   // three.js mid-flight would freeze the motion.
   const [settled, setSettled] = React.useState(false);
+  // No WebGL, or the model or viewer failed to load: show the cover photo.
+  const [modelFailed, setModelFailed] = React.useState(false);
+  const onModelError = React.useCallback(() => setModelFailed(true), []);
   React.useLayoutEffect(() => whenSettled(() => setSettled(true)), []);
 
   const touring = stage >= 0;
@@ -159,9 +147,11 @@ function CadTour({ narrow }) {
   return (
     <section id="rb-cad" ref={ref} className="g-rs-pin" style={{ height: `${(2 + N) * 100 + 60}vh` }}>
       <div className="g-rs-sticky g-rb-cad">
-        {settled && <SkipOnError>
+        {modelFailed ? <ModelFallback className="g-rb-robot" src={COVER.cover} alt={COVER.coverAlt} />
+          : settled && <SkipOnError onError={onModelError}>
           <React.Suspense fallback={null}>
             <RobotExplode
+              onError={onModelError}
               className="g-rb-robot"
               src={MODEL}
               subsystems={SUBSYSTEMS}

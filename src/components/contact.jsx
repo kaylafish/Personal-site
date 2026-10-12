@@ -12,7 +12,8 @@ function Contact() {
         <h2 className="g-contact-big">
           <span className="g-contact-hello">Say hello.</span>
           <br />
-          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+          {/* On phones the address wraps after the @, never mid-word. */}
+          <a href={`mailto:${EMAIL}`}>{EMAIL.split('@')[0]}@<wbr />{EMAIL.split('@')[1]}</a>
         </h2>
       </Rv>
 
