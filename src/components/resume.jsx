@@ -23,20 +23,13 @@ const RESUME = [
   ] },
   { id: 'education', name: 'Education', items: [
     { when: '2026 – 2030', title: 'B.S. Aerospace Engineering', org: 'Worcester Polytechnic Institute',
-      desc: 'Expected May 2030. Varsity field hockey, High-Powered Rocketry, AIAA, and SWE.',
-      image: '/assets/campus.webp', alt: 'WPI campus' },
+      desc: 'Expected May 2030. Varsity field hockey, High-Powered Rocketry, AIAA, and SWE.' },
     { when: '2022 – 2026', title: 'IB Diploma', org: 'Monterey High School · Ranked 16 of 350',
-      desc: '4.6 weighted GPA. IB HL: Math AA, Physics, Chemistry, and English A. Varsity field hockey (captain), FIRST Robotics, Monterey Academy of Oceanographic Science. Summa Cum Laude.',
-      image: '/assets/portrait.webp', alt: 'Mikayla Fisher' },
+      desc: '4.6 weighted GPA. IB HL: Math AA, Physics, Chemistry, and English A. Varsity field hockey (captain), FIRST Robotics, Monterey Academy of Oceanographic Science. Summa Cum Laude.' },
   ] },
   { id: 'volunteering', name: 'Volunteering', items: [
     { when: '2024 – present', title: 'Founder, Interim President & Secretary', org: 'Robodores Foundation',
-      desc: 'Founded and incorporated a 501(c)(3) nonprofit supporting STEM education in Monterey County. Responsible for board meetings and documentation.',
-      image: '/assets/team.webp', alt: 'Robodores team' },
-  ] },
-  { id: 'publications', name: 'Publications', items: [
-    { when: 'Year', title: 'Add publication', org: 'Venue or journal',
-      desc: 'Placeholder: paper title, co-authors, and a link.', placeholder: true },
+      desc: 'Founded and incorporated a 501(c)(3) nonprofit supporting STEM education in Monterey County. Responsible for board meetings and documentation.' },
   ] },
 ];
 

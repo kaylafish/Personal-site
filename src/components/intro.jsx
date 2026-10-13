@@ -1,7 +1,7 @@
 import React from 'react';
 import { clamp, useScrollFrame } from './motion.jsx';
 
-const INTRO = "I'm Mikayla, I study Aerospace Engineering at Worcester Polytechnic Institute, where I focus on the intersection of GNC and EDL. While I retain deep theoretical expertise in the field, I also maintain lots of practical experience, including in CAD, manufacturing, and programming.";
+const INTRO = "Aspiring Aerospace engineer focused on the intersection of GNC (Guidance, Navigation, and Control), and EDL (Entry, Descent, and Landing). I'm drawn to developing autonomous systems that cannot rely on human input for complex tasks and decision making. I enjoy thinking at the system level, using my experience across hardware and software to make design decisions that complement the system as a whole.";
 const WORDS = INTRO.split(' ');
 
 // Handwritten paragraph whose words light up as it scrolls through the viewport.
